@@ -4,17 +4,23 @@ import { ref } from 'vue';
 
 const accountData = {
   keyword: '',
-  country: '',
+  country: 'GB',
 };
-
 const accountDataLocal = ref(structuredClone(accountData));
 const eventData = ref([]); // This will store the event data from the API
+const errorMessage = ref(''); // Reactive variable to store error messages
+
+const reloadPage = () => {
+  window.location.reload();
+};
 
 const resetForm = () => {
   accountDataLocal.value = structuredClone(accountData);
+  errorMessage.value = ''; // Clear the error message when resetting the form
 };
 
 const scrapeData = async () => {
+  errorMessage.value = ''; // Clear the error message before making a new request
   const apiKey = '7elxdku9GGG5k8j0Xm8KWdANDgecHMV0'; // Replace with your actual API key
   const keyword = accountDataLocal.value.keyword;
   const country = accountDataLocal.value.country;
@@ -23,18 +29,20 @@ const scrapeData = async () => {
 
   try {
     const response = await axios.get(apiUrl);
-    eventData.value = response.data._embedded.events.map(event => ({
-      name: event.name,
-      url: event.url,
-      salesStartDateTime: event.sales.public.startDateTime,
-      salesEndDateTime: event.sales.public.endDateTime,
-      minPrice: event.priceRanges ? event.priceRanges[0].min : 'N/A',
-      maxPrice: event.priceRanges ? event.priceRanges[0].max : 'N/A',
-      ticketLimit: event.ticketLimit ? event.ticketLimit.info : 'N/A',
-    }));
+    if (response.data._embedded && response.data._embedded.events.length > 0) {
+      eventData.value = response.data._embedded.events.map(event => ({
+        name: event.name,
+        url: event.url,
+        salesStartDateTime: event.sales.public.startDateTime,
+        minPrice: event.priceRanges ? event.priceRanges[0].min : 'N/A',
+        maxPrice: event.priceRanges ? event.priceRanges[0].max : 'N/A',
+      }));
+    } else {
+      errorMessage.value = 'No events found for the given search criteria.';
+    }
   } catch (error) {
     console.error(error);
-    // Handle error, potentially update UI to inform the user
+    errorMessage.value = 'An error occurred while fetching the data.';
   }
 };
 </script>
@@ -42,6 +50,11 @@ const scrapeData = async () => {
 <template>
   <VRow>
     <VCol cols="12">
+      <!-- Error Message -->
+      <VAlert v-if="errorMessage" type="error" dense>
+        {{ errorMessage }}
+      </VAlert>
+
       <!-- Form -->
       <VForm class="mt-6">
         <VRow>
@@ -64,14 +77,14 @@ const scrapeData = async () => {
           </VCol>
           <!-- Form Actions -->
           <VCol cols="12" class="d-flex flex-wrap gap-4">
-            <VBtn @click.prevent="scrapeData">
+            <VBtn color="primary" @click.prevent="scrapeData">
               Scrape
             </VBtn>
             <VBtn
               color="secondary"
               variant="tonal"
-              type="reset"
-              @click.prevent="resetForm"
+              type="button"
+              @click.prevent="reloadPage"
             >
               Reset
             </VBtn>
@@ -84,16 +97,14 @@ const scrapeData = async () => {
   <!-- Table Section -->
   <VRow>
     <VCol cols="12">
-      <VTable height="750" fixed-header>
+      <VTable v-if="eventData.length > 0" height="750" fixed-header>
         <thead>
           <tr>
             <th>Event Name</th>
             <th>Event URL</th>
             <th>Sales Start DateTime</th>
-            <th>Sales End DateTime</th>
             <th>Min Price</th>
             <th>Max Price</th>
-            <th>Ticket Limit</th>
           </tr>
         </thead>
         <tbody>
@@ -103,13 +114,18 @@ const scrapeData = async () => {
               <a :href="event.url" target="_blank">{{ event.url }}</a>
             </td>
             <td>{{ event.salesStartDateTime }}</td>
-            <td>{{ event.salesEndDateTime }}</td>
             <td>{{ event.minPrice }}</td>
             <td>{{ event.maxPrice }}</td>
-            <td>{{ event.ticketLimit }}</td>
           </tr>
         </tbody>
       </VTable>
+      <VAlert
+        v-else
+        type="info"
+        dense
+      >
+        No events to display. Adjust search criteria and try again.
+      </VAlert>
     </VCol>
   </VRow>
 </template>
