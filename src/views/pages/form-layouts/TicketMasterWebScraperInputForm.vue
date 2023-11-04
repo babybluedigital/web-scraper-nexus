@@ -84,7 +84,7 @@ const scrapeData = async () => {
   <!-- Table Section -->
   <VRow>
     <VCol cols="12">
-      <VTable height="250" fixed-header>
+      <VTable height="750" fixed-header>
         <thead>
           <tr>
             <th>Event Name</th>

@@ -71,14 +71,6 @@ const vuetifyTheme = useTheme()
         }"
       />
 
-      <VerticalNavLink
-        :item="{
-          title: 'Scraper',
-          icon: 'mdi-account-cog-outline',
-          to: '/scraper',
-        }"
-      />
-
       <!-- 👉 Coming Soon -->
       <VerticalNavSectionTitle
         :item="{
