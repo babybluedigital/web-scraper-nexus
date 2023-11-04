@@ -100,7 +100,7 @@ const scrapeData = async () => {
       <VTable v-if="eventData.length > 0" height="750" fixed-header>
         <thead>
           <tr>
-            <th>Event Name</th>
+            <th class="freeze-column-1">Event Name</th>
             <th>Event URL</th>
             <th>Sales Start DateTime</th>
             <th>Min Price</th>
@@ -109,7 +109,7 @@ const scrapeData = async () => {
         </thead>
         <tbody>
           <tr v-for="event in eventData" :key="event.name">
-            <td>{{ event.name }}</td>
+            <td class="freeze-column-2">{{ event.name }}</td>
             <td>
               <a :href="event.url" target="_blank">{{ event.url }}</a>
             </td>
@@ -129,3 +129,19 @@ const scrapeData = async () => {
     </VCol>
   </VRow>
 </template>
+
+<style>
+.freeze-column-1 {
+  position: sticky !important;
+  z-index: 100 !important;
+  background-color: white !important; /* Change to match your table's background color */
+  inset-inline-start: 0 !important;
+}
+
+.freeze-column-2 {
+  position: sticky !important;
+  z-index: 10 !important;
+  background-color: white !important; /* Change to match your table's background color */
+  inset-inline-start: 0 !important;
+}
+</style>
