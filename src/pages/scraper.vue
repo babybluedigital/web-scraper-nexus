@@ -1,6 +1,5 @@
 <script setup>
 import AnalyticsCongratulations from '@/views/dashboard/AnalyticsCongratulations.vue';
-import TicketMasterWebScraperInputForm from '@/views/pages/form-layouts/TicketMasterWebScraperInputForm.vue';
 
 // 👉 Images
 </script>
@@ -19,7 +18,7 @@ import TicketMasterWebScraperInputForm from '@/views/pages/form-layouts/TicketMa
       <!-- 👉 Multiple Column -->
       <VCard title="TicketMaster API Scrape">
         <VCardText>
-          <TicketMasterWebScraperInputForm />
+          
         </VCardText>
       </VCard>
     </VCol>
