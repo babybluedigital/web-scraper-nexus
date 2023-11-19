@@ -1,7 +1,7 @@
 <script setup>
-import illustrationJohnDark from '@images/cards/illustration-john-dark.png'
-import illustrationJohnLight from '@images/cards/illustration-john-light.png'
-import { useTheme } from 'vuetify'
+import illustrationJohnDark from '@images/cards/illustration-john-dark.png';
+import illustrationJohnLight from '@images/cards/illustration-john-light.png';
+import { useTheme } from 'vuetify';
 
 const { global } = useTheme()
 const illustrationJohn = computed(() => global.name.value === 'dark' ? illustrationJohnDark : illustrationJohnLight)
@@ -18,17 +18,14 @@ const illustrationJohn = computed(() => global.name.value === 'dark' ? illustrat
       >
         <VCardItem>
           <VCardTitle class="text-md-h5 text-primary">
-            Welcome To Nexus 🎉
+            Hi Nick, See your latest scrapes below!
           </VCardTitle>
         </VCardItem>
 
         <VCardText>
           <span>
-            To begin, use one of the scrapers below.
+            To begin, check your Active Scrapers to see more.
           </span>
-          <br>
-          <br>
-          <br>
         </VCardText>
       </VCol>
 

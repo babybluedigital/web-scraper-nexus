@@ -13,6 +13,14 @@ const router = createRouter({
           component: () => import('../pages/dashboard.vue'),
         },
         {
+          path: 'ticket-scrapers',
+          component: () => import('../pages/ticket-scrapers.vue'),
+        },
+        {
+          path: 'active-scrapes',
+          component: () => import('../pages/active-scrapes.vue'),
+        },
+        {
           path: 'account-settings',
           component: () => import('../pages/account-settings.vue'),
         },
