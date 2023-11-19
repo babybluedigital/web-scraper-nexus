@@ -1,43 +1,59 @@
 <script setup>
-// Your existing imports and ref declarations
+import logo from '@images/logo.svg?raw';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const form = ref({
+  email: '',
+  password: '',
+  remember: false,
+});
+
+const isPasswordVisible = ref(false);
+const loginFailure = ref(false);
+const router = useRouter();
+
+console.log('Login page loaded');
 
 const login = () => {
-  // Example check - replace with your authentication logic
+  console.log('Attempting login');
   if (form.email === 'luke@babyblue.info' && form.password === 'Password1') {
+    console.log('Login successful');
     const now = new Date();
-    const expiryTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
-    localStorage.setItem('isLoggedIn', true);
-    localStorage.setItem('expiry', expiryTime);
-    // Redirect to your home page
-    $router.push('/');
+    const expiryTime = now.getTime() + 24 * 60 * 60 * 1000; // 24 hours from now
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('expiry', expiryTime.toString());
+    loginFailure.value = false;
+    router.push('/'); // Redirect to home page
   } else {
-    // Handle login failure
+    console.log('Login failed');
+    loginFailure.value = true; // Set to true on failure
   }
 };
 
 onMounted(() => {
-  const expiry = new Date(localStorage.getItem('expiry'));
-  if (new Date() > expiry) {
+  console.log('Checking session status');
+  const expiry = localStorage.getItem('expiry');
+  if (expiry && new Date().getTime() > parseInt(expiry)) {
+    console.log('Session expired, clearing data');
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('expiry');
     // Optional: Redirect to login page
+    console.log('Redirecting to login page');
+    router.push('/login'); // Uncomment to enable redirection
+  } else {
+    console.log('Session active or no session exists');
   }
 });
 </script>
 
 <template>
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
-    <VCard
-    class="auth-card pa-4 pt-7"
-    max-width="448"
-    >
+    <VCard class="auth-card pa-4 pt-7" max-width="448">
     <VCardItem class="justify-center">
       <template #prepend>
         <div class="d-flex">
-          <div
-          class="d-flex text-primary"
-          v-html="logo"
-          />
+          <div class="d-flex text-primary" v-html="logo"/>
         </div>
       </template>
       
@@ -60,40 +76,19 @@ onMounted(() => {
         <VRow>
           <!-- email -->
           <VCol cols="12">
-            <VTextField
-            v-model="form.email"
-            autofocus
-            placeholder="johndoe@email.com"
-            label="Email"
-            type="email"
-            />
+            <VTextField v-model="form.email" autofocus placeholder="johndoe@email.com" label="Email" type="email"/>
           </VCol>
           
           <!-- password -->
           <VCol cols="12">
-            <VTextField
-            v-model="form.password"
-            label="Password"
-            placeholder="············"
+            <VTextField v-model="form.password" label="Password" placeholder="············" 
             :type="isPasswordVisible ? 'text' : 'password'"
             :append-inner-icon="isPasswordVisible ? 'bx-hide' : 'bx-show'"
-            @click:append-inner="isPasswordVisible = !isPasswordVisible"
-            />
+            @click:append-inner="isPasswordVisible = !isPasswordVisible"/>
             
             <!-- remember me checkbox -->
             <div class="d-flex align-center justify-space-between flex-wrap mt-1 mb-4">
-              <VCheckbox
-              v-model="form.remember"
-              label="Remember me"
-              />
-              
-              <!--
-                <RouterLink
-                class="text-primary ms-2 mb-1"
-                to="javascript:void(0)"
-                >
-                Forgot Password?
-              </RouterLink> -->
+
             </div>
             
             <!-- login button -->
@@ -106,41 +101,15 @@ onMounted(() => {
           </VBtn>
           
         </VCol>
+        <VCol cols="12">
+          <VCardText v-if="loginFailure" class="error-message">
+            Invalid email or password. Please try again.
+          </VCardText>
+        </VCol>
         
-        <!-- Comment Out Registration Section of Login Page 
-          // create account
-          <VCol
-          cols="12"
-          class="text-center text-base"
-          >
-          <span>New on our platform?</span>
-          <RouterLink
-          class="text-primary ms-2"
-          to="/register"
-          >
-          Create an account
-        </RouterLink>
-      </VCol>
-      
-      <VCol
-      cols="12"
-      class="d-flex align-center"
-      >
-      <VDivider />
-      <span class="mx-4">or</span>
-      <VDivider />
-    </VCol>
-    
-    // auth providers
-    <VCol
-    cols="12"
-    class="text-center"
-    >
-    <AuthProvider />
-  </VCol> -->
-</VRow>
-</VForm>
-</VCardText>
+      </VRow>
+    </VForm>
+  </VCardText>
 </VCard>
 </div>
 </template>
