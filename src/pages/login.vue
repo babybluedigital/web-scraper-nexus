@@ -16,18 +16,19 @@ const router = useRouter();
 console.log('Login page loaded');
 
 const login = () => {
-  console.log('Attempting login');
-  if (form.email === 'luke@babyblue.info' && form.password === 'Password1') {
+  console.log('Attempting login with Email:', form.value.email, 'Password:', form.value.password);
+  if (form.value.email === 'luke@babyblue.info' && form.value.password === 'Password1') {
     console.log('Login successful');
     const now = new Date();
     const expiryTime = now.getTime() + 24 * 60 * 60 * 1000; // 24 hours from now
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('expiry', expiryTime.toString());
     loginFailure.value = false;
-    router.push('/'); // Redirect to home page
+    router.push('/'); // Redirect to dashboard on successful login
   } else {
     console.log('Login failed');
-    loginFailure.value = true; // Set to true on failure
+    loginFailure.value = true;
+    // Stay on login page, no redirection on failure
   }
 };
 
@@ -38,7 +39,6 @@ onMounted(() => {
     console.log('Session expired, clearing data');
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('expiry');
-    // Optional: Redirect to login page
     console.log('Redirecting to login page');
     router.push('/login'); // Uncomment to enable redirection
   } else {
@@ -72,7 +72,7 @@ onMounted(() => {
     </VCardText>
     
     <VCardText>
-      <VForm @submit.prevent="$router.push('/')">
+      <VForm @submit.prevent="login">
         <VRow>
           <!-- email -->
           <VCol cols="12">
