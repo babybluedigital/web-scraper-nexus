@@ -3,7 +3,7 @@
 
 const login = () => {
   // Example check - replace with your authentication logic
-  if (form.email === 'your_username' && form.password === 'your_password') {
+  if (form.email === 'luke@babyblue.info' && form.password === 'Password1') {
     const now = new Date();
     const expiryTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
     localStorage.setItem('isLoggedIn', true);
