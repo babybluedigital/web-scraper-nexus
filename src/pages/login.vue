@@ -76,7 +76,8 @@ onMounted(() => {
         <VRow>
           <!-- email -->
           <VCol cols="12">
-            <VTextField v-model="form.email" autofocus placeholder="johndoe@email.com" label="Email" type="email"/>
+            <VTextField v-model="form.email" autofocus placeholder="johndoe@email.com" label="Email" type="email"
+            autocomplete="username" />
           </VCol>
           
           <!-- password -->
@@ -84,7 +85,8 @@ onMounted(() => {
             <VTextField v-model="form.password" label="Password" placeholder="············" 
             :type="isPasswordVisible ? 'text' : 'password'"
             :append-inner-icon="isPasswordVisible ? 'bx-hide' : 'bx-show'"
-            @click:append-inner="isPasswordVisible = !isPasswordVisible"/>
+            @click:append-inner="isPasswordVisible = !isPasswordVisible"
+            autocomplete="current-password" />
             
             <!-- remember me checkbox -->
             <div class="d-flex align-center justify-space-between flex-wrap mt-1 mb-4">
@@ -95,7 +97,6 @@ onMounted(() => {
             <VBtn
             block
             type="submit"
-            @click="login"
             >
             Login
           </VBtn>
