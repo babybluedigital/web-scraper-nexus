@@ -1,5 +1,6 @@
 <script setup>
 import AnalyticsCongratulations from '@/views/dashboard/AnalyticsCongratulations.vue';
+import DatePicker from '@/views/dashboard/DatePicker.vue';
 
 </script>
 
@@ -15,9 +16,9 @@ import AnalyticsCongratulations from '@/views/dashboard/AnalyticsCongratulations
   
   <VCol cols="12">
       <!-- 👉 Multiple Column -->
-      <VCard title="TicketMaster API Scrape">
+      <VCard title="Test">
         <VCardText>
-          
+          <DatePicker />
         </VCardText>
       </VCard>
     </VCol>
