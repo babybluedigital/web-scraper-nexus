@@ -17,7 +17,7 @@ console.log('Login page loaded');
 
 const login = () => {
   console.log('Attempting login with Email:', form.value.email, 'Password:', form.value.password);
-  if (form.value.email === 'luke@babyblue.info' && form.value.password === 'Password1') {
+  if (form.value.email === 'brisbanenicky@yahoo.co.uk' && form.value.password === 'Password1') {
     console.log('Login successful');
     const now = new Date();
     const expiryTime = now.getTime() + 24 * 60 * 60 * 1000; // 24 hours from now

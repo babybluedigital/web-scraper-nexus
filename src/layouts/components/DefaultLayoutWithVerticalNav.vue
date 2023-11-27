@@ -70,13 +70,6 @@ const vuetifyTheme = useTheme()
     to: '/ticket-master-scraper',
   }"
   />
-  <VerticalNavLink
-  :item="{
-    title: 'Event Brite',
-    icon: 'bx-message-square-add',
-    to: '/event-brite-scraper',
-  }"
-  />
   <!-- 👉 Divider -->
   <VerticalNavSectionTitle
   :item="{

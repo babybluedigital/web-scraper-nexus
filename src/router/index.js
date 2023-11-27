@@ -17,10 +17,6 @@ const router = createRouter({
           component: () => import('../pages/ticket-master-scraper.vue'),
         },
         {
-          path: 'event-brite-scraper',
-          component: () => import('../pages/event-brite-scraper.vue'),
-        },
-        {
           path: 'active-scrapes',
           component: () => import('../pages/active-scrapes.vue'),
         },
