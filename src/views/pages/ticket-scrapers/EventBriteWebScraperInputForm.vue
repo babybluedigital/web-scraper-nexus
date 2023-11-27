@@ -94,7 +94,7 @@ const scrapeData = async () => {
   <VRow>
     <VCol cols="12">
       <VCard class="pa-5">
-        <v-card-title class="ps-0 pt-0">TicketMaster Scraper</v-card-title>
+        <v-card-title class="ps-0 pt-0">EventBrite Scraper (In Development)</v-card-title>
         <!-- Error Message -->
         <VAlert v-if="errorMessage" type="error" dense>
           {{ errorMessage }}

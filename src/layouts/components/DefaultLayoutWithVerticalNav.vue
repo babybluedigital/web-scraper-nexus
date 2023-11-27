@@ -19,74 +19,87 @@ const vuetifyTheme = useTheme()
       <div class="d-flex h-100 align-center">
         <!-- 👉 Vertical nav toggle in overlay mode -->
         <IconBtn
-          class="ms-n3 d-lg-none"
-          @click="toggleVerticalOverlayNavActive(true)"
+        class="ms-n3 d-lg-none"
+        @click="toggleVerticalOverlayNavActive(true)"
         >
-          <VIcon icon="bx-menu" />
-        </IconBtn>
+        <VIcon icon="bx-menu" />
+      </IconBtn>
+      
+      <!-- 👉 Search -->
+      <div
+      class="d-flex align-center cursor-pointer"
+      style="user-select: none;"
+      >
+      
+      <span class="d-none d-md-flex align-center text-disabled">
+        <span class="me-3">Welcome To Nexus Nick 🎉</span>
+      </span>
+    </div>
+    
+    <VSpacer />
+    
+    <IconBtn class="me-2">
+      <VIcon icon="bx-bell" />
+    </IconBtn>
+    
+    <NavbarThemeSwitcher class="me-2" />
+    
+    <UserProfile />
+  </div>
+</template>
 
-        <!-- 👉 Search -->
-        <div
-          class="d-flex align-center cursor-pointer"
-          style="user-select: none;"
-        >
+<template #vertical-nav-content>
+  <VerticalNavLink
+  :item="{
+    title: 'Dashboard',
+    icon: 'bx-home',
+    to: '/dashboard',
+  }"
+  />
+  
+  <!-- 👉 Divider -->
+  <VerticalNavSectionTitle
+  :item="{
+    heading: 'Nexus Scrapers',
+  }"
+  />
+  <VerticalNavLink
+  :item="{
+    title: 'Ticket Master',
+    icon: 'bx-message-square-add',
+    to: '/ticket-master-scraper',
+  }"
+  />
+  <VerticalNavLink
+  :item="{
+    title: 'Event Brite',
+    icon: 'bx-message-square-add',
+    to: '/event-brite-scraper',
+  }"
+  />
+  <!-- 👉 Divider -->
+  <VerticalNavSectionTitle
+  :item="{
+    heading: 'Scrape Results',
+  }"
+  />
+  <VerticalNavLink
+  :item="{
+    title: 'Active Scrapes',
+    icon: 'bx-table',
+    to: '/active-scrapes',
+  }"
+  />
+</template>
 
-          <span class="d-none d-md-flex align-center text-disabled">
-            <span class="me-3">Welcome To Nexus Nick 🎉</span>
-          </span>
-        </div>
+<!-- 👉 Pages -->
+<slot />
 
-        <VSpacer />
-
-        <IconBtn class="me-2">
-          <VIcon icon="bx-bell" />
-        </IconBtn>
-
-        <NavbarThemeSwitcher class="me-2" />
-
-        <UserProfile />
-      </div>
-    </template>
-
-    <template #vertical-nav-content>
-      <VerticalNavLink
-        :item="{
-          title: 'Dashboard',
-          icon: 'bx-home',
-          to: '/dashboard',
-        }"
-      />
-
-      <!-- 👉 Coming Soon -->
-      <VerticalNavSectionTitle
-        :item="{
-          heading: 'Nexus Features',
-        }"
-      />
-      <VerticalNavLink
-        :item="{
-          title: 'Add New Scraper',
-          icon: 'bx-message-square-add',
-          to: '/ticket-scrapers',
-        }"
-      />
-      <VerticalNavLink
-        :item="{
-          title: 'Active Scrapes',
-          icon: 'bx-table',
-          to: '/active-scrapes',
-        }"
-      />
-    </template>
-
-    <!-- 👉 Pages -->
-    <slot />
-
-    <!-- 👉 Footer -->
-    <template #footer>
-      <Footer />
-    </template>
-  </VerticalNavLayout>
+<!-- 👉 Footer -->
+<template #footer>
+  <Footer />
+</template>
+</VerticalNavLayout>
 </template>
 
 <style lang="scss" scoped>
