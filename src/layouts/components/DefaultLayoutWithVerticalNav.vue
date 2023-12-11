@@ -83,6 +83,13 @@ const vuetifyTheme = useTheme()
     to: '/active-scrapes',
   }"
   />
+  <VerticalNavLink
+  :item="{
+    title: 'Archive Scrapes',
+    icon: 'bx-archive',
+    to: '/archive-scrapes',
+  }"
+  />
 </template>
 
 <!-- 👉 Pages -->

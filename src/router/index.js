@@ -20,6 +20,10 @@ const router = createRouter({
           path: 'active-scrapes',
           component: () => import('../pages/active-scrapes.vue'),
         },
+        {
+          path: 'archive-scrapes',
+          component: () => import('../pages/archived-scrapes.vue'),
+        },
       ],
     },
     {

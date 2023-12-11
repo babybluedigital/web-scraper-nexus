@@ -310,7 +310,7 @@ const scrapeData = async () => {
   <VCol cols="12">
     <VCard class="pt-5 px-5 pb-5">
       <v-chip size="x-large" class="ma-2" color="success" variant="tonal">
-        Your Results
+        Your Test Results
       </v-chip>
       <VTable v-if="eventData.length > 0" fixed-header>
         <thead>
