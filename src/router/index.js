@@ -13,8 +13,8 @@ const router = createRouter({
           component: () => import('../pages/dashboard.vue'),
         },
         {
-          path: 'ticket-master-scraper',
-          component: () => import('../pages/ticket-master-scraper.vue'),
+          path: 'ticket-master-page',
+          component: () => import('../pages/ticket-master-page.vue'),
         },
         {
           path: 'active-scrapes',

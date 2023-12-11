@@ -67,7 +67,7 @@ const vuetifyTheme = useTheme()
   :item="{
     title: 'Ticket Master',
     icon: 'bx-message-square-add',
-    to: '/ticket-master-scraper',
+    to: '/ticket-master-page',
   }"
   />
   <!-- 👉 Divider -->

@@ -1,15 +1,16 @@
 import axios from 'axios';
 
-// Base URL for the WordPress API
 const API_BASE_URL = 'https://wordpressmu-878924-4140720.cloudwaysapps.com/wp-json/wp/v2';
 
-// Function to post scrape data
+// Use the base64 encoded credentials from your Postman example
+const encodedCredentials = 'bHVrZS5tY2ZhcmxhbmRAYmFieWJsdWUuaW5mbzp5ZlUyIE9hWmcgdEhyVyBkOHhyIEF5dlggWWZOWg==';
+
 const postScrapeConfig = async (scrapeData) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/scrape`, scrapeData, {
       headers: {
         'Content-Type': 'application/json',
-        // Add any necessary headers here, such as authentication tokens
+        'Authorization': `Basic ${encodedCredentials}`
       },
     });
     return response.data;
@@ -19,5 +20,5 @@ const postScrapeConfig = async (scrapeData) => {
   }
 };
 
-// Export the service function
 export { postScrapeConfig };
+

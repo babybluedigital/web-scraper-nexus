@@ -1,4 +1,5 @@
 <script setup>
+import { postScrapeConfig } from '@/services/scrapePostService';
 import axios from '@axios';
 import { computed, ref } from 'vue';
 
@@ -22,6 +23,10 @@ const openUrl = (url) => {
 const startDateDialog = ref(false);
 const endDateDialog = ref(false);
 
+// User UI States for Successfull and Error Alerts When Saving Scrapers
+const showSuccessAlert = ref(false);
+const showErrorAlert = ref(false);
+
 // Computed properties for displaying formatted start and end dates
 const startDateLabel = computed(() => accountDataLocal.value.startDate ? `${accountDataLocal.value.startDate}` : 'No Start Date Selected');
 const endDateLabel = computed(() => accountDataLocal.value.endDate ? `${accountDataLocal.value.endDate}` : 'No End Date Selected');
@@ -44,6 +49,61 @@ const formatDateToISO = (date) => {
   if (!date) return '';
   const d = new Date(date);
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}T${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}:${String(d.getUTCSeconds()).padStart(2, '0')}Z`;
+};
+
+
+// Make Artist Name Required
+const required = value => !!value || 'Required.';
+
+// Function to save the scrape
+const saveScrape = async () => {
+  try {
+    // Validate the Artist Name field
+    if (!accountDataLocal.value.keyword) {
+      showErrorAlert.value = true; // Show error alert
+      showSuccessAlert.value = false; // Hide success alert
+      errorMessage.value = 'Artist Name is required.'; // Set error message
+      return; // Exit the function
+    }
+
+    // Helper function to format date
+    const formatTicketMasterDateToACF = (dateString) => {
+      if (!dateString) return 'No Date Selected';
+      
+      const date = new Date(dateString);
+      return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+    };
+    
+    const formattedStartDate = formatTicketMasterDateToACF(accountDataLocal.value.startDate);
+    const formattedEndDate = formatTicketMasterDateToACF(accountDataLocal.value.endDate);
+    
+    // Create a dynamic title
+    const dynamicTitle = `${accountDataLocal.value.keyword} - ${accountDataLocal.value.country} - ${formattedStartDate}`;
+    
+    const scrapeData = {
+      title: dynamicTitle,
+      status: "publish",
+      acf: {
+        artist_name: accountDataLocal.value.keyword,
+        country: accountDataLocal.value.country,
+        start_date: formattedStartDate,
+        end_date: formattedEndDate
+      }
+    };
+    
+    const result = await postScrapeConfig(scrapeData);
+    console.log('Data posted successfully:', result);
+    
+    showSuccessAlert.value = true; // Show success alert
+    showErrorAlert.value = false; // Hide error alert
+    errorMessage.value = ''; // Clear error message
+  } catch (error) {
+    console.error('Error saving scrape:', error);
+    
+    showErrorAlert.value = true; // Show error alert
+    showSuccessAlert.value = false; // Hide success alert
+    errorMessage.value = 'Error saving scrape. Please try again.'; // Set error message
+  }
 };
 
 // Function to scrape data using the Ticketmaster API
@@ -109,6 +169,7 @@ const scrapeData = async () => {
               v-model="accountDataLocal.keyword"
               placeholder="Enter Artist Name"
               label="Enter Artist Name"
+              :rules="[required]"
               />
             </VCol>
             
@@ -197,7 +258,7 @@ const scrapeData = async () => {
           <VRow>
             <VCol cols="12" md="6" class="d-flex flex-wrap gap-4">
               <VBtn size="large" append-icon="mdi-arrow-right" color="primary" @click.prevent="scrapeData">
-                Begin Scraping
+                Test Scraper
               </VBtn>
               <VBtn
               size="large"
@@ -212,14 +273,35 @@ const scrapeData = async () => {
           </VCol>
           <VCol cols="12" md="6" class="d-flex justify-end flex-wrap gap-4">
             <VBtn size="large" append-icon="mdi-content-save-check-outline" color="warning" variant="tonal" type="button"
-            @click.prevent="reloadPage"
+            @click.prevent="saveScrape"
             >
             Save Scraper
           </VBtn>
         </VCol>
-      </VRow>
-    </VForm>
-  </VCard>
+        <VCol>
+          <!-- Success Alert -->
+          <VAlert
+          v-if="showSuccessAlert"
+          type="success"
+          dismissible
+          @click:close="showSuccessAlert = false"
+          >
+          Your Scraper Has Been Saved Successfully
+        </VAlert>
+        
+        <!-- Error Alert -->
+        <VAlert
+        v-if="showErrorAlert"
+        type="error"
+        dismissible
+        @click:close="showErrorAlert = false"
+        >
+        Your Scraper Has Not Been Saved, Please Try Again Or Click the "RESET" Button
+      </VAlert>
+    </VCol>
+  </VRow>
+</VForm>
+</VCard>
 </VCol>
 </VRow>
 
