@@ -1,8 +1,7 @@
 <script setup>
-import TicketMasterWebScraperInputForm from '@/views/pages/ticket-scrapers/TicketMasterWebScraperInputForm.vue';
-
+ import TicketMasterWebPage from '@/components/TicketMasterWebPage.vue';
 </script>
 
 <template>
-  <TicketMasterWebScraperInputForm />
+  <TicketMasterWebPage />
 </template>
