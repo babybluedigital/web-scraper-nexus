@@ -1,7 +1,8 @@
 <template>
   <VRow>
     <VCol cols="12">
-      <VCard class="pt-5 px-5 pb-5" title="Your Active Scrapes">
+      <VCard class="pt-5 px-5 pb-5">
+        <v-card-title class="ps-0 pt-0">Your Active Scrapes</v-card-title>
         <div v-if="loading">Loading data...</div>
         <VTable v-else fixed-header>
           <thead>
@@ -59,6 +60,9 @@
       <!-- Bind the title to the postTitle property -->
       <v-toolbar-title>{{ postTitle }}</v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-chip color="red-lighten-4" variant="tonal" class="ma-2">
+        {{expiryDate}}
+      </v-chip>
       <v-btn icon color="warning" @click="toggleSidePanel">
         <v-icon>mdi-close</v-icon>
       </v-btn>
@@ -69,6 +73,7 @@
 </template>
 
 <script>
+import { deleteScrape } from '@/services/scrapeDeleteService'; // Import the deleteScrape function
 import { fetchScrapes } from '@/services/scrapeGetService'; // Update the import path as needed
 
 export default {
@@ -80,6 +85,7 @@ export default {
       searchPerformed: false,
       sidePanelOpen: false, // Initially, the side panel is closed
       postTitle: '', // Initialize postTitle with an empty string
+      deletingScrapeId: null, // Track the ID of the scrape being deleted
     };
   },
   mounted() {
@@ -90,7 +96,8 @@ export default {
       this.loading = true;
       try {
         const data = await fetchScrapes();
-        this.scrapes = data;
+        // Filter the data to include only active scrapes
+        this.scrapes = data.filter(scrape => scrape.acf.status === 'Active');
         this.searchPerformed = true;
         
         // Assuming you have retrieved the post title from your CMS data
@@ -101,9 +108,17 @@ export default {
         this.loading = false;
       }
     },
-    deleteScrape(scrapeId) {
-      // Implement the logic to delete a scrape with the given ID
-      // You can use an API call or another method to delete the scrape
+    async deleteScrape(scrapeId) {
+      // Reload the page immediately after initiating the delete operation
+      // window.location.reload();
+      
+      try {
+        // Implement the logic to delete a scrape with the given ID
+        // You can use the deleteScrape function from the service
+        await deleteScrape(scrapeId);
+      } catch (error) {
+        console.error('Failed to delete the post:', error);
+      }
     },
     openSidePanel(scrape) {
       // Open the side panel when "View Results" is clicked
@@ -111,6 +126,9 @@ export default {
       
       // Set the postTitle based on the selected 'scrape' data
       this.postTitle = `${scrape.acf.artist_name} - ${scrape.acf.country} - ${scrape.acf.start_date}`;
+      
+      // Set the end date for the side panel
+      this.expiryDate = `Expires - ${scrape.acf.end_date}`;
     },
     toggleSidePanel() {
       // Toggle the side panel open/close

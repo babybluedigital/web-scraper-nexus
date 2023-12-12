@@ -1,13 +1,11 @@
 <script setup>
-import sidePanel from '@/components/testComponents/sidePanel.vue';
+import archivedTicketScrapeTable from '@/views/pages/ticket-tables/archivedTicketScrapeTable.vue';
 </script>
 
 <template>
   <VRow>
     <VCol cols="12">
-      <VCard title="Your Active Scrapes">
-        <sidePanel />
-      </VCard>
+        <archivedTicketScrapeTable />
     </VCol>
   </VRow>
 </template>
