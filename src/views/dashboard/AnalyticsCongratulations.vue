@@ -24,7 +24,7 @@ const illustrationJohn = computed(() => global.name.value === 'dark' ? illustrat
 
         <VCardText>
           <span>
-            To begin, check your Active Scrapers to see more.
+            Check your Active Scrapers to see more details.
           </span>
         </VCardText>
       </VCol>

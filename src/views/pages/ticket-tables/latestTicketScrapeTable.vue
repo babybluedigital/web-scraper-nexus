@@ -2,8 +2,8 @@
   <VRow>
     <VCol cols="12">
       <VCard class="pt-5 px-5 pb-5">
-        <VCardTitle class="ps-0 pt-0 text-success">
-          Active Scrapes
+        <VCardTitle class="ps-0 pt-0">
+          Latest Scrapes
         </VCardTitle>
         <div v-if="loading">Loading data...</div>
         <VTable v-else fixed-header>
@@ -14,11 +14,10 @@
               <th><strong>Selected Start Date</strong></th>
               <th><strong>Selected End Date</strong></th>
               <th><strong>Results</strong></th>
-              <th><strong>Manage</strong></th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="scrape in scrapes" :key="scrape.id">
+            <tr v-for="(scrape, index) in scrapes.slice(0, 5)" :key="scrape.id">
               <td>{{ scrape.acf.artist_name }}</td>
               <td>{{ scrape.acf.country }}</td>
               <td>{{ scrape.acf.start_date }}</td>
@@ -32,26 +31,17 @@
                 View Results
               </v-chip>
             </td>
-            <td>
-              <v-chip
-              clickable
-              color="warning"
-              @click="archiveScrape(scrape.id)"
-              >
-              Archive Scrape
-            </v-chip>
-          </td>
-        </tr>
-      </tbody>
-    </VTable>
-    <VAlert
-    v-if="searchPerformed && scrapes.length === 0"
-    type="info"
-    dense
-    >
-    No events to display. Adjust search criteria and try again.
-  </VAlert>
-</VCard>
+          </tr>
+        </tbody>
+      </VTable>
+      <VAlert
+      v-if="searchPerformed && scrapes.length === 0"
+      type="info"
+      dense
+      >
+      No events to display. Adjust search criteria and try again.
+    </VAlert>
+  </VCard>
 </VCol>
 </VRow>
 
