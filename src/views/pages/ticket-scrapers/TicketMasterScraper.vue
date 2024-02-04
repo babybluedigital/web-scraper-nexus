@@ -1,31 +1,26 @@
 <script setup>
-import { postScrapeConfig } from '@/services/scrapePostService';
-import axios from '@axios';
+import {
+accountDataLocal,
+errorMessage,
+eventData,
+saveScrape,
+scrapeData,
+searchPerformed,
+showErrorAlert,
+showSuccessAlert
+} from '@/scrapers/TicketMasterScraper.js';
 import { computed, ref } from 'vue';
 
-// Initialize data and reactive variables
-console.log('Initializing data...');
-const accountData = {
-  keyword: '',
-  country: 'GB',
-  startDate: null,
-  endDate: null,
-};
-const accountDataLocal = ref(structuredClone(accountData));
-const eventData = ref([]); // Stores the event data from the API
-const errorMessage = ref(''); // Stores error messages
-const searchPerformed = ref(false); // Tracks if a search has been executed
-const openUrl = (url) => {
-  window.open(url, '_blank');
-}; // Open Event Url in a new tab
+// Computed property to check if all required fields are filled
+const isFormValid = computed(() => {
+  return accountDataLocal.value.keyword && 
+  accountDataLocal.value.startDate && 
+  accountDataLocal.value.endDate;
+});
 
 // References for the date picker dialogs
 const startDateDialog = ref(false);
 const endDateDialog = ref(false);
-
-// User UI States for Successfull and Error Alerts When Saving Scrapers
-const showSuccessAlert = ref(false);
-const showErrorAlert = ref(false);
 
 // Computed properties for displaying formatted start and end dates
 const startDateLabel = computed(() => accountDataLocal.value.startDate ? `${accountDataLocal.value.startDate}` : 'No Start Date Selected');
@@ -44,111 +39,16 @@ const resetForm = () => {
   errorMessage.value = '';
 };
 
-// Function to format dates to ISO string
-const formatDateToISO = (date) => {
-  if (!date) return '';
-  const d = new Date(date);
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}T${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}:${String(d.getUTCSeconds()).padStart(2, '0')}Z`;
-};
-
-
 // Make Artist Name Required
 const required = value => !!value || 'Required.';
+// Make date fields required
+const dateRequired = value => value || 'Required.';
 
-// Function to save the scrape
-const saveScrape = async () => {
-  try {
-    // Validate the Artist Name field
-    if (!accountDataLocal.value.keyword) {
-      showErrorAlert.value = true; // Show error alert
-      showSuccessAlert.value = false; // Hide success alert
-      errorMessage.value = 'Artist Name is required.'; // Set error message
-      return; // Exit the function
-    }
-
-    // Helper function to format date
-    const formatTicketMasterDateToACF = (dateString) => {
-      if (!dateString) return 'No Date Selected';
-      
-      const date = new Date(dateString);
-      return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
-    };
-    
-    const formattedStartDate = formatTicketMasterDateToACF(accountDataLocal.value.startDate);
-    const formattedEndDate = formatTicketMasterDateToACF(accountDataLocal.value.endDate);
-    
-    // Create a dynamic title
-    const dynamicTitle = `${accountDataLocal.value.keyword} - ${accountDataLocal.value.country} - ${formattedStartDate}`;
-    
-    const scrapeData = {
-      title: dynamicTitle,
-      status: "publish",
-      acf: {
-        artist_name: accountDataLocal.value.keyword,
-        country: accountDataLocal.value.country,
-        start_date: formattedStartDate,
-        end_date: formattedEndDate
-      }
-    };
-    
-    const result = await postScrapeConfig(scrapeData);
-    console.log('Data posted successfully:', result);
-    
-    showSuccessAlert.value = true; // Show success alert
-    showErrorAlert.value = false; // Hide error alert
-    errorMessage.value = ''; // Clear error message
-  } catch (error) {
-    console.error('Error saving scrape:', error);
-    
-    showErrorAlert.value = true; // Show error alert
-    showSuccessAlert.value = false; // Hide success alert
-    errorMessage.value = 'Error saving scrape. Please try again.'; // Set error message
-  }
+// Function to open URL in a new tab
+const openUrl = (url) => {
+  window.open(url, '_blank');
 };
-
-// Function to scrape data using the Ticketmaster API
-const scrapeData = async () => {
-  console.log('Scraping data...');
-  errorMessage.value = ''; // Reset error message before making a new request
-  eventData.value = []; // Clear previous event data
-  searchPerformed.value = false; // Reset search performed flag
-  
-  const apiKey = 'PF6iGSTrUmYAJ0JnAYA6pKlpEOOkyGA3';
-  const keyword = accountDataLocal.value.keyword;
-  const country = accountDataLocal.value.country;
-  const startDate = formatDateToISO(accountDataLocal.value.startDate);
-  const endDate = formatDateToISO(accountDataLocal.value.endDate);
-  
-  const apiUrl = `https://app.ticketmaster.com/discovery/v2/events?apikey=${apiKey}&keyword=${keyword}&locale=*&countryCode=${country}&startDateTime=${startDate}&endDateTime=${endDate}`;
-  
-  try {
-    const response = await axios.get(apiUrl);
-    console.log('API response received:', response);
-    
-    if (response.data._embedded && response.data._embedded.events.length > 0) {
-      eventData.value = response.data._embedded.events.map(event => ({
-        name: event.name,
-        url: event.url,
-        venue: event._embedded.venues[0].name, // Extracting venue name
-        eventStartDate: event.dates.start.localDate, // Extracting event start date
-        salesStartDateTime: event.sales.public.startDateTime,
-        minPrice: event.priceRanges ? event.priceRanges[0].min : 'N/A',
-        maxPrice: event.priceRanges ? event.priceRanges[0].max : 'N/A',
-      }));
-    } else {
-      console.log('No events found for the given criteria');
-      // No need to set errorMessage here as it's not an error
-    }
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    errorMessage.value = 'An error occurred while fetching the data.';
-  }
-  
-  searchPerformed.value = true; // Indicate that a search has been performed
-};
-
 </script>
-
 
 <template>
   <VRow>
@@ -178,7 +78,7 @@ const scrapeData = async () => {
               <VSelect
               v-model="accountDataLocal.country"
               label="Select Country"
-              :items="['US', 'GB', 'AT', 'AU', 'ZA']"
+              :items="['GB']"
               placeholder="Select Country"
               />
             </VCol>
@@ -190,116 +90,142 @@ const scrapeData = async () => {
                 <template v-slot:activator="{ props }">
                   <v-row align="center">
                     <v-col cols="auto">
-                      <v-btn color="default" prepend-icon="mdi-calendar" v-bind="props" variant="tonal">Select Start Date</v-btn>
-                    </v-col>
-                    <v-col class="d-flex justify-end flex-wrap">
-                      <v-chip v-if="startDateLabel" class="ml-2" color="primary" text-color="white">
-                        {{ startDateLabel }}
-                      </v-chip>
-                    </v-col>
-                  </v-row>
-                </template>
-                
-                <template v-slot:default="dialogScope">
-                  <v-card>
-                    <v-card-title>Select Start Date</v-card-title>
-                    <v-card-text>
-                      <v-date-picker v-model="accountDataLocal.startDate" @input="dialogScope.isActive = false"></v-date-picker>
-                    </v-card-text>
-                    <v-card-actions>
-                      <v-spacer></v-spacer>
-                    </v-card-actions>
-                  </v-card>
-                </template>
-              </v-dialog> 
+                      <v-btn
+                      color="default"
+                      prepend-icon="mdi-calendar"
+                      v-bind="props"
+                      variant="tonal"
+                      >Select Start Date
+                      <v-tooltip
+                      activator="parent"
+                      location="end"
+                      >Select the start date for this scraper</v-tooltip>
+                    </v-btn>
+                  </v-col>
+                  <v-col class="d-flex justify-end flex-wrap">
+                    <v-chip v-if="startDateLabel" class="ml-2" color="primary" text-color="white">
+                      {{ startDateLabel }}
+                    </v-chip>
+                  </v-col>
+                </v-row>
+              </template>
               
-            </VCol>
+              <template v-slot:default="dialogScope">
+                <v-card>
+                  <v-card-title>Select Start Date</v-card-title>
+                  <v-card-text>
+                    <v-date-picker v-model="accountDataLocal.startDate" :rules="[dateRequired]" @input="dialogScope.isActive = false"></v-date-picker>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                  </v-card-actions>
+                </v-card>
+              </template>
+            </v-dialog> 
             
-            <!-- End Date Picker -->
-            <VCol cols="12" md="6">
-              
-              <v-dialog ref="endDialog" width="500" v-model="endDateDialog">
-                <template v-slot:activator="{ props }">
-                  <v-row align="center">
-                    <v-col cols="auto">
-                      <v-btn color="default" prepend-icon="mdi-calendar" v-bind="props" variant="tonal">Select End Date</v-btn>
-                    </v-col>
-                    <v-col class="d-flex justify-end flex-wrap">
-                      <v-chip v-if="endDateLabel" class="ml-2" color="primary" text-color="white">
-                        {{ endDateLabel }}
-                      </v-chip>
-                    </v-col>
-                  </v-row>
-                </template>
-                
-                <template v-slot:default="dialogScope">
-                  <v-card>
-                    <v-card-title>Select End Date</v-card-title>
-                    <v-card-text>
-                      <v-date-picker v-model="accountDataLocal.endDate" @input="dialogScope.isActive = false"></v-date-picker>
-                    </v-card-text>
-                    <v-card-actions>
-                      <v-spacer></v-spacer>
-                      <v-btn text @click="endDateDialog = false">Close</v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </template>
-              </v-dialog>
-              
-            </VCol>
-          </VRow>
-          
-          <VRow class="px-4 py-5">
-            <!-- Divider to split the inputs and form buttons -->
-            <v-divider :thickness="2"></v-divider>
-          </VRow>
-          
-          <!-- Form Actions -->
-          <VRow>
-            <VCol cols="12" md="6" class="d-flex flex-wrap gap-4">
-              <VBtn size="large" append-icon="mdi-arrow-right" color="primary" @click.prevent="scrapeData">
-                Test Scraper
-              </VBtn>
-              <VBtn
-              size="large"
-              append-icon="mdi-reload"
-              color="secondary"
-              variant="tonal"
-              type="button"
-              @click.prevent="reloadPage"
-              >
-              Reset Scraper
-            </VBtn>
           </VCol>
-          <VCol cols="12" md="6" class="d-flex justify-end flex-wrap gap-4">
-            <VBtn size="large" append-icon="mdi-content-save-check-outline" color="warning" variant="tonal" type="button"
-            @click.prevent="saveScrape"
-            >
-            Save Scraper
-          </VBtn>
+          
+          <!-- End Date Picker -->
+          <VCol cols="12" md="6">
+            
+            <v-dialog ref="endDialog" width="500" v-model="endDateDialog">
+              <template v-slot:activator="{ props }">
+                <v-row align="center">
+                  <v-col cols="auto">
+                    <v-btn
+                    color="default"
+                    prepend-icon="mdi-calendar"
+                    v-bind="props"
+                    variant="tonal"
+                    >Select End Date
+                    <v-tooltip
+                    activator="parent"
+                    location="end"
+                    >Select the end date for this scraper</v-tooltip>
+                  </v-btn>
+                </v-col>
+                <v-col class="d-flex justify-end flex-wrap">
+                  <v-chip v-if="endDateLabel" class="ml-2" color="primary" text-color="white">
+                    {{ endDateLabel }}
+                  </v-chip>
+                </v-col>
+              </v-row>
+            </template>
+            
+            <template v-slot:default="dialogScope">
+              <v-card>
+                <v-card-title>Select End Date</v-card-title>
+                <v-card-text>
+                  <v-date-picker v-model="accountDataLocal.endDate" :rules="[dateRequired]" @input="dialogScope.isActive = false"></v-date-picker>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn text @click="endDateDialog = false">Close</v-btn>
+                </v-card-actions>
+              </v-card>
+            </template>
+          </v-dialog>
+          
         </VCol>
-        <VCol>
-          <!-- Success Alert -->
-          <VAlert
-          v-if="showSuccessAlert"
-          type="success"
-          dismissible
-          @click:close="showSuccessAlert = false"
+      </VRow>
+      
+      <VRow class="px-4 py-5">
+        <!-- Divider to split the inputs and form buttons -->
+        <v-divider :thickness="2"></v-divider>
+      </VRow>
+      
+      <!-- Form Actions -->
+      <VRow>
+        <VCol cols="12" md="6" class="d-flex flex-wrap gap-4">
+          <VBtn size="large" append-icon="mdi-arrow-right" color="primary" @click.prevent="scrapeData">
+            Test Scraper
+          </VBtn>
+          <VBtn
+          size="large"
+          append-icon="mdi-reload"
+          color="secondary"
+          variant="tonal"
+          type="button"
+          @click.prevent="reloadPage"
           >
-          Your Scraper Has Been Saved Successfully
-        </VAlert>
-        
-        <!-- Error Alert -->
-        <VAlert
-        v-if="showErrorAlert"
-        type="error"
-        dismissible
-        @click:close="showErrorAlert = false"
+          Reset Scraper
+        </VBtn>
+      </VCol>
+      <VCol cols="12" md="6" class="d-flex justify-end flex-wrap gap-4">
+        <VBtn 
+        size="large" 
+        append-icon="mdi-content-save-check-outline" 
+        color="warning" 
+        variant="tonal" 
+        type="button"
+        @click.prevent="saveScrape"
+        :disabled="!isFormValid"
         >
-        Your Scraper Has Not Been Saved, Please Try Again Or Click the "RESET" Button
-      </VAlert>
+        Save Scraper
+      </VBtn>
     </VCol>
-  </VRow>
+    <VCol>
+      <!-- Success Alert -->
+      <VAlert
+      v-if="showSuccessAlert"
+      type="success"
+      dismissible
+      @click:close="showSuccessAlert = false"
+      >
+      Your Scraper Has Been Saved Successfully
+    </VAlert>
+    
+    <!-- Error Alert -->
+    <VAlert
+    v-if="showErrorAlert"
+    type="error"
+    dismissible
+    @click:close="showErrorAlert = false"
+    >
+    Your Scraper Has Not Been Saved, Please Try Again Or Click the "RESET" Button
+  </VAlert>
+</VCol>
+</VRow>
 </VForm>
 </VCard>
 </VCol>
