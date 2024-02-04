@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://wordpressmu-878924-4140720.cloudwaysapps.com/wp-json/wp/v2';
+const API_BASE_URL = 'https://nexus.headless.babyblue.info/wp-json/wp/v2';
 
 // Use the base64 encoded credentials from your Postman example
 const encodedCredentials = 'bHVrZS5tY2ZhcmxhbmRAYmFieWJsdWUuaW5mbzp5ZlUyIE9hWmcgdEhyVyBkOHhyIEF5dlggWWZOWg==';
@@ -21,3 +21,4 @@ const fetchScrapes = async () => {
 };
 
 export { fetchScrapes };
+
