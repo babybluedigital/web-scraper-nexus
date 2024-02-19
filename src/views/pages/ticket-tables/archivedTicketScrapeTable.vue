@@ -26,10 +26,10 @@
                             <td>
                                 <v-chip
                                 clickable
-                                color="success"
-                                @click="openSidePanel(scrape)"
+                                color="warning"
+                                @click="reactivateScrape(scrape)"
                                 >
-                                View Results
+                                Re-Activate
                             </v-chip>
                         </td>
                         <td>
@@ -58,29 +58,12 @@
 </VCard>
 </VCol>
 </VRow>
-
-<!-- Side Panel -->
-<v-navigation-drawer v-model="sidePanelOpen" temporary location="right" :width="1000">
-    <v-card color="grey-lighten-4" flat rounded="0" height="100vh">
-        <v-toolbar density="comfortable">
-            <!-- Bind the title to the postTitle property -->
-            <v-toolbar-title>{{ postTitle }}</v-toolbar-title>
-            <v-spacer></v-spacer>
-            <v-chip color="error" variant="tonal" class="ma-2">
-                {{expiryDate}}
-            </v-chip>
-            <v-btn icon color="warning" @click="toggleSidePanel">
-                <v-icon>mdi-close</v-icon>
-            </v-btn>
-        </v-toolbar>
-        <!-- Content for the side panel goes here -->
-    </v-card>
-</v-navigation-drawer>
 </template>
 
 <script>
 import { deleteScrape } from '@/services/scrapeDeleteService'; // Import the deleteScrape function
 import { fetchScrapes } from '@/services/scrapeGetService'; // Update the import path as needed
+import { updateScrapeStatus } from '@/services/scrapeUpdateService'; // Import the updateScrapeStatus function
 
 export default {
     name: 'ActiveTicketScrapeTable',
@@ -116,30 +99,30 @@ export default {
             }
         },
         async deleteScrape(scrapeId) {
-    try {
-        // Implement the logic to delete a scrape with the given ID
-        // You can use the deleteScrape function from the service
-        await deleteScrape(scrapeId);
-        // Refresh the data after successful deletion
-        this.loadData();
-    } catch (error) {
-        console.error('Failed to delete the post:', error);
-    }
-},
-        openSidePanel(scrape) {
-            // Open the side panel when "View Results" is clicked
-            this.sidePanelOpen = true;
-            
-            // Set the postTitle based on the selected 'scrape' data
-            this.postTitle = `${scrape.acf.artist_name} : ${scrape.acf.start_date} (${scrape.acf.country})`;
-            
-            // Set the end date for the side panel
-            this.expiryDate = `Expired - ${scrape.acf.end_date}`;
+            try {
+                // Implement the logic to delete a scrape with the given ID
+                // You can use the deleteScrape function from the service
+                await deleteScrape(scrapeId);
+                // Refresh the data after successful deletion
+                this.loadData();
+            } catch (error) {
+                console.error('Failed to delete the post:', error);
+            }
         },
-        toggleSidePanel() {
-            // Toggle the side panel open/close
-            this.sidePanelOpen = !this.sidePanelOpen;
-        },
+        async reactivateScrape(scrape) {
+            try {
+                const success = await updateScrapeStatus(scrape.id, 'Active');
+                if (success) {
+                    // Optionally, refresh the list to reflect the status update
+                    this.loadData();
+                } else {
+                    // Handle the case where the update wasn't successful
+                    console.error('Failed to reactivate the scrape');
+                }
+            } catch (error) {
+                console.error('Failed to reactivate the scrape:', error);
+            }
+        },   
     },
 };
 </script>

@@ -11,8 +11,8 @@
             <tr>
               <th><strong>Artist Name</strong></th>
               <th><strong>Country</strong></th>
-              <th><strong>Selected Start Date</strong></th>
-              <th><strong>Selected End Date</strong></th>
+              <th><strong>Scrape Start Date</strong></th>
+              <th><strong>Scrape End Date</strong></th>
               <th><strong>Results</strong></th>
               <th><strong>Manage</strong></th>
             </tr>
@@ -70,35 +70,35 @@
       </v-btn>
     </v-toolbar>
     <!-- Content for the side panel goes here -->
-  <VRow>
-    <VCol cols="12">
-      <VCard class="pt-5 px-5 pb-5" variant="flat">
-        <VTable v-if="eventData && eventData._embedded.events.length > 0" fixed-header>
-          <thead>
-            <tr>
-              <th><strong>Event Name</strong></th>
-              <th><strong>Sales Start Date</strong></th>
-              <th><strong>Max Price</strong></th>
-              <th><strong>Venue</strong></th>
-              <th><strong>Event Start Date</strong></th>
-              <th><strong>Event URL</strong></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="event in eventData._embedded.events" :key="event.id">
-              <td>{{ event.name }}</td>
-              <td>{{ event.sales.public.startDateTime }}</td>
-              <td>
-                {{ event.priceRanges ? event.priceRanges[0].max + ' ' + event.priceRanges[0].currency : 'N/A' }}
-              </td>
-              <td>{{ event._embedded.venues[0].name }}</td>
-              <td>{{ event.dates.start.dateTime }}</td>
-              <td>
-                <v-chip
+    <VRow>
+      <VCol cols="12">
+        <VCard class="pt-5 px-5 pb-5" variant="flat">
+          <VTable v-if="eventData && eventData._embedded.events.length > 0" fixed-header>
+            <thead>
+              <tr>
+                <th><strong>Event Name</strong></th>
+                <th><strong>Sales Start Date</strong></th>
+                <th><strong>Max Price</strong></th>
+                <th><strong>Venue</strong></th>
+                <th><strong>Event Start Date</strong></th>
+                <th><strong>Event URL</strong></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="event in eventData._embedded.events" :key="event.id">
+                <td>{{ event.name }}</td>
+                <td>{{ event.sales.public.startDateTime }}</td>
+                <td>
+                  {{ event.priceRanges ? event.priceRanges[0].max + ' ' + event.priceRanges[0].currency : 'N/A' }}
+                </td>
+                <td>{{ event._embedded.venues[0].name }}</td>
+                <td>{{ event.dates.start.dateTime }}</td>
+                <td>
+                  <v-chip
                   clickable
                   color="primary"
                   @click="openUrl(event.url)"
-                >
+                  >
                   View Event
                 </v-chip>
               </td>
@@ -106,15 +106,15 @@
           </tbody>
         </VTable>
         <VAlert
-          v-if="!eventData || eventData._embedded.events.length === 0"
-          type="info"
-          dense
+        v-if="!eventData || eventData._embedded.events.length === 0"
+        type="info"
+        dense
         >
-          No events to display. Adjust search criteria and try again.
-        </VAlert>
-      </VCard>
-    </VCol>
-  </VRow>
+        No events to display. Adjust search criteria and try again.
+      </VAlert>
+    </VCard>
+  </VCol>
+</VRow>
 </v-card>
 </v-navigation-drawer>
 </template>
@@ -167,7 +167,7 @@ export default {
     openSidePanel(scrape) {
       this.sidePanelOpen = true;
       this.postTitle = `${scrape.acf.artist_name} : ${scrape.acf.start_date} (${scrape.acf.country})`;
-      this.expiryDate = `Expires - ${scrape.acf.end_date}`;
+      this.expiryDate = `Scrape Expires - ${scrape.acf.end_date}`;
       this.fetchEventData(scrape.acf.artist_name, scrape.acf.country, scrape.acf.start_date, scrape.acf.end_date);
     },
     toggleSidePanel() {
@@ -207,6 +207,11 @@ export default {
 
 
 <style>
+.v-table {
+  max-block-size: 85vh;
+  overflow-y: auto;
+}
+
 .v-table th {
   text-align: start !important;
 }
