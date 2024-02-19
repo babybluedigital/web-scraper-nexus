@@ -70,13 +70,22 @@
       </v-btn>
     </v-toolbar>
     <!-- Content for the side panel goes here -->
+    <div>
+      <template v-if="eventData">
+        <div v-for="event in eventData._embedded.events" :key="event.id">
+          <h3>{{ event.name }}</h3>
+          <p>{{ event.dates.start.localDate }}</p>
+        </div>
+      </template>
+      <div v-else>No event data to display.</div>
+    </div>
   </v-card>
 </v-navigation-drawer>
 </template>
 
 <script>
-import { fetchScrapes } from '@/services/scrapeGetService'; // Update the import path as needed
-import { updateScrapeStatus } from '@/services/scrapeUpdateService'; // Import the updateScrapeStatus function
+import { fetchScrapes } from '@/services/scrapeGetService';
+import { updateScrapeStatus } from '@/services/scrapeUpdateService';
 
 export default {
   name: 'ActiveTicketScrapeTable',
@@ -85,9 +94,10 @@ export default {
       scrapes: [],
       loading: false,
       searchPerformed: false,
-      sidePanelOpen: false, // Initially, the side panel is closed
-      postTitle: '', // Initialize postTitle with an empty string
-      deletingScrapeId: null, // Track the ID of the scrape being deleted
+      sidePanelOpen: false,
+      postTitle: '',
+      deletingScrapeId: null,
+      eventData: null, // Add this line to store the fetched event data
     };
   },
   mounted() {
@@ -98,12 +108,8 @@ export default {
       this.loading = true;
       try {
         const data = await fetchScrapes();
-        // Filter the data to include only active scrapes
         this.scrapes = data.filter(scrape => scrape.acf.status === 'Active');
         this.searchPerformed = true;
-        
-        // Assuming you have retrieved the post title from your CMS data
-        this.postTitle = data.postTitle; // Update 'data.postTitle' with the actual property from your CMS data
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -112,13 +118,9 @@ export default {
     },
     async archiveScrape(scrapeId) {
       try {
-        // Update the status of the scrape to "Archived"
         const success = await updateScrapeStatus(scrapeId, 'Archived');
-        
         if (success) {
-          // Reload the page or refresh the data as needed
-          // window.location.reload();
-          this.loadData(); // Refresh data for the current view
+          this.loadData();
         } else {
           console.error('Failed to archive the post');
         }
@@ -127,22 +129,44 @@ export default {
       }
     },
     openSidePanel(scrape) {
-      // Open the side panel when "View Results" is clicked
       this.sidePanelOpen = true;
-      
-      // Set the postTitle based on the selected 'scrape' data
       this.postTitle = `${scrape.acf.artist_name} : ${scrape.acf.start_date} (${scrape.acf.country})`;
-      
-      // Set the end date for the side panel
       this.expiryDate = `Expires - ${scrape.acf.end_date}`;
+      this.fetchEventData(scrape.acf.artist_name, scrape.acf.country, scrape.acf.start_date, scrape.acf.end_date);
     },
     toggleSidePanel() {
-      // Toggle the side panel open/close
       this.sidePanelOpen = !this.sidePanelOpen;
     },
+    async fetchEventData(artistName, countryCode, startDateTime, endDateTime) {
+      const apiKey = 'PF6iGSTrUmYAJ0JnAYA6pKlpEOOkyGA3';
+      
+      // Correctly format the date from 'dd/mm/yyyy' to 'YYYY-MM-DDTHH:mm:ssZ'
+      const convertDate = (date, isStart) => {
+        const parts = date.split('/');
+        // Ensure parts are correctly ordered for 'YYYY-MM-DD' format
+        const formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        return isStart ? `${formattedDate}T14:00:00Z` : `${formattedDate}T23:59:59Z`;
+      };
+      
+      const formattedStartDate = convertDate(startDateTime, true);
+      const formattedEndDate = convertDate(endDateTime, false);
+      
+      let url = `https://app.ticketmaster.com/discovery/v2/events?apikey=${apiKey}&keyword=${encodeURIComponent(artistName)}&locale=*&countryCode=${countryCode}&startDateTime=${formattedStartDate}&endDateTime=${formattedEndDate}`;
+      
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        this.eventData = data; // Store the fetched data
+        // existing logging code
+      } catch (error) {
+        console.error('Error fetching event data:', error);
+      }
+    },
   },
+  
 };
 </script>
+
 
 <style>
 .v-table th {
