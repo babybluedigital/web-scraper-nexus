@@ -121,7 +121,7 @@
 
 <script>
 import { fetchScrapes } from '@/services/scrapeGetService';
-import { updateScrapeStatus } from '@/services/scrapeUpdateService';
+import { updateScrapeApiValue, updateScrapeStatus } from '@/services/scrapeUpdateService';
 
 export default {
   name: 'ActiveTicketScrapeTable',
@@ -168,12 +168,17 @@ export default {
       this.sidePanelOpen = true;
       this.postTitle = `${scrape.acf.artist_name} : ${scrape.acf.start_date} (${scrape.acf.country})`;
       this.expiryDate = `Scrape Expires - ${scrape.acf.end_date}`;
-      this.fetchEventData(scrape.acf.artist_name, scrape.acf.country, scrape.acf.start_date, scrape.acf.end_date);
+      
+      // Call fetchEventData to fetch event data and update api_value
+      this.fetchEventData(scrape);
     },
     toggleSidePanel() {
       this.sidePanelOpen = !this.sidePanelOpen;
     },
-    async fetchEventData(artistName, countryCode, startDateTime, endDateTime) {
+    async fetchEventData(scrape) {
+      // Extract necessary data from the 'scrape' object
+      const { artist_name, country, start_date, end_date } = scrape.acf;
+      
       const apiKey = 'PF6iGSTrUmYAJ0JnAYA6pKlpEOOkyGA3';
       
       // Correctly format the date from 'dd/mm/yyyy' to 'YYYY-MM-DDTHH:mm:ssZ'
@@ -184,18 +189,25 @@ export default {
         return isStart ? `${formattedDate}T14:00:00Z` : `${formattedDate}T23:59:59Z`;
       };
       
-      const formattedStartDate = convertDate(startDateTime, true);
-      const formattedEndDate = convertDate(endDateTime, false);
+      const formattedStartDate = convertDate(start_date, true);
+      const formattedEndDate = convertDate(end_date, false);
       
-      let url = `https://app.ticketmaster.com/discovery/v2/events?apikey=${apiKey}&keyword=${encodeURIComponent(artistName)}&locale=*&countryCode=${countryCode}&startDateTime=${formattedStartDate}&endDateTime=${formattedEndDate}`;
+      let url = `https://app.ticketmaster.com/discovery/v2/events?apikey=${apiKey}&keyword=${encodeURIComponent(artist_name)}&locale=*&countryCode=${country}&startDateTime=${formattedStartDate}&endDateTime=${formattedEndDate}`;
       
       try {
         const response = await fetch(url);
         const data = await response.json();
         this.eventData = data; // Store the fetched data
-        // existing logging code
+        
+        // Update api_value with the constructed URL
+        const updateSuccess = await updateScrapeApiValue(scrape.id, url); // Assuming 'scrape.id' is accessible
+        if (updateSuccess) {
+          console.log('Successfully updated api_value with the URL:', url);
+        } else {
+          console.error('Failed to update api_value with the URL');
+        }
       } catch (error) {
-        console.error('Error fetching event data:', error);
+        console.error('Error fetching event data or updating api_value:', error);
       }
     },
     openUrl(url) {

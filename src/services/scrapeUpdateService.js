@@ -33,5 +33,35 @@ const updateScrapeStatus = async (scrapeId, newStatus) => {
   }
 };
 
-export { updateScrapeStatus };
+// New function to update api_value
+const updateScrapeApiValue = async (scrapeId, apiValue) => {
+  try {
+    const payload = {
+      acf: {
+        api_value: apiValue,
+      },
+    };
+
+    const response = await axios.put(`${API_BASE_URL}/scrape/${scrapeId}`, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${encodedCredentials}`,
+      },
+    });
+
+    if (response.status === 200) {
+      console.log('Successfully updated api_value for', scrapeId);
+      return true;
+    } else {
+      console.error('Failed to update api_value:', response);
+      return false;
+    }
+  } catch (error) {
+    console.error('Error updating api_value:', error);
+    return false;
+  }
+};
+
+
+export { updateScrapeApiValue, updateScrapeStatus };
 
