@@ -218,7 +218,7 @@ export default {
 </script>
 
 
-<style>
+<style scoped>
 .v-table {
   max-block-size: 85vh;
   overflow-y: auto;
@@ -227,4 +227,5 @@ export default {
 .v-table th {
   text-align: start !important;
 }
+
 </style>

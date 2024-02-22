@@ -1,1 +1,6 @@
 // Write your overrides
+
+/* Make Columns min width of 200px */
+table > tbody > tr > td {
+    min-width: 200px !important;
+}
