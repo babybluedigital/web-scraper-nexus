@@ -56,7 +56,7 @@
 </VRow>
 
 <!-- Side Panel -->
-<v-navigation-drawer v-model="sidePanelOpen" temporary location="right" :width="1000">
+<v-navigation-drawer v-model="sidePanelOpen" temporary :touchless="true" location="right" :width="1000">
   <v-card color="grey-lighten-4" flat rounded="0" height="100vh">
     <v-toolbar density="comfortable">
       <!-- Bind the title to the postTitle property -->
@@ -121,7 +121,7 @@
 
 <script>
 import { fetchScrapes } from '@/services/scrapeGetService';
-import { updateScrapeStatus } from '@/services/scrapeUpdateService';
+import { updateScrapeApiValue, updateScrapeStatus } from '@/services/scrapeUpdateService';
 
 export default {
   name: 'ActiveTicketScrapeTable',
@@ -176,12 +176,15 @@ export default {
       this.sidePanelOpen = !this.sidePanelOpen;
     },
     async fetchEventData(scrape) {
+      // Extract necessary data from the 'scrape' object
       const { artist_name, country, start_date, end_date } = scrape.acf;
       
       const apiKey = 'PF6iGSTrUmYAJ0JnAYA6pKlpEOOkyGA3';
       
+      // Correctly format the date from 'dd/mm/yyyy' to 'YYYY-MM-DDTHH:mm:ssZ'
       const convertDate = (date, isStart) => {
         const parts = date.split('/');
+        // Ensure parts are correctly ordered for 'YYYY-MM-DD' format
         const formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
         return isStart ? `${formattedDate}T14:00:00Z` : `${formattedDate}T23:59:59Z`;
       };
@@ -194,11 +197,19 @@ export default {
       try {
         const response = await fetch(url);
         const data = await response.json();
-        this.eventData = data;
+        this.eventData = data; // Store the fetched data
+        
+        // Update api_value with the constructed URL
+        const updateSuccess = await updateScrapeApiValue(scrape.id, url); // Assuming 'scrape.id' is accessible
+        if (updateSuccess) {
+          console.log('Successfully updated api_value with the URL:', url);
+        } else {
+          console.error('Failed to update api_value with the URL');
+        }
       } catch (error) {
-        console.error('Error fetching event data:', error);
+        console.error('Error fetching event data or updating api_value:', error);
       }
-    },    
+    },
     openUrl(url) {
       window.open(url, '_blank');
     },
