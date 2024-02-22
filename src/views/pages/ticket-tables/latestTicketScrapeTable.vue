@@ -26,7 +26,7 @@
                 <v-chip
                 clickable
                 color="success"
-                @click="openSidePanel(scrape)"
+                to="/active-scrapes"
                 >
                 View Results
               </v-chip>
@@ -115,20 +115,6 @@ export default {
       } catch (error) {
         console.error('Error archiving the post:', error);
       }
-    },
-    openSidePanel(scrape) {
-      // Open the side panel when "View Results" is clicked
-      this.sidePanelOpen = true;
-      
-      // Set the postTitle based on the selected 'scrape' data
-      this.postTitle = `${scrape.acf.artist_name} : ${scrape.acf.start_date} (${scrape.acf.country})`;
-      
-      // Set the end date for the side panel
-      this.expiryDate = `Expires - ${scrape.acf.end_date}`;
-    },
-    toggleSidePanel() {
-      // Toggle the side panel open/close
-      this.sidePanelOpen = !this.sidePanelOpen;
     },
   },
 };
