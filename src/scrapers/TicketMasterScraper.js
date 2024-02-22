@@ -10,11 +10,11 @@ export const accountData = {
   startDate: null,
   endDate: null,
 };
+
 export const accountDataLocal = ref(structuredClone(accountData));
 export const eventData = ref([]); // Stores the event data from the API
 export const errorMessage = ref(''); // Stores error messages
 export const searchPerformed = ref(false); // Tracks if a search has been executed
-
 export const showSuccessAlert = ref(false);
 export const showErrorAlert = ref(false);
 
@@ -49,6 +49,8 @@ export const saveScrape = async () => {
 
     // Create a dynamic title
     const dynamicTitle = `${accountDataLocal.value.keyword} - ${accountDataLocal.value.country} - ${formattedStartDate}`;
+    // Construct the TicketMaster API URL
+    const apiUrl = `https://app.ticketmaster.com/discovery/v2/events?apikey=PF6iGSTrUmYAJ0JnAYA6pKlpEOOkyGA3&keyword=${encodeURIComponent(accountDataLocal.value.keyword)}&locale=*&countryCode=${accountDataLocal.value.country}&startDateTime=${formatDateToISO(accountDataLocal.value.startDate)}&endDateTime=${formatDateToISO(accountDataLocal.value.endDate)}`;
 
     const scrapeData = {
       title: dynamicTitle,
@@ -57,7 +59,9 @@ export const saveScrape = async () => {
         artist_name: accountDataLocal.value.keyword,
         country: accountDataLocal.value.country,
         start_date: formattedStartDate,
-        end_date: formattedEndDate
+        end_date: formattedEndDate,
+        api_value: apiUrl, // Include the API URL here
+        status: "Active", // Update the status here
       }
     };
 
@@ -91,6 +95,8 @@ export const scrapeData = async () => {
   
   const apiUrl = `https://app.ticketmaster.com/discovery/v2/events?apikey=${apiKey}&keyword=${keyword}&locale=*&countryCode=${country}&startDateTime=${startDate}&endDateTime=${endDate}`;
   
+  console.log('TicketMaster API URL:', apiUrl); // Log the API URL
+
   try {
     const response = await axios.get(apiUrl);
     console.log('API response received:', response);
@@ -116,3 +122,25 @@ export const scrapeData = async () => {
   
   searchPerformed.value = true; // Indicate that a search has been performed
 };
+
+export const scrapeAndPostData = async () => {
+  // Step 2: Fetch data from TicketMaster API
+  const ticketMasterResponse = await scrapeData(); // Assumes scrapeData fetches and returns TicketMaster API response
+
+  // Check if you need to modify or use the response directly
+  const modifiedScrapeData = {
+    ...ticketMasterResponse,
+    // Add any additional modifications or enrichments here
+  };
+
+  // Step 3 & 4: Post to Nexus endpoint
+  try {
+    const postResponse = await postScrapeConfig(modifiedScrapeData);
+    console.log('Data posted successfully:', postResponse);
+    // Handle success scenario
+  } catch (error) {
+    console.error('Error posting to Nexus:', error);
+    // Handle error scenario
+  }
+};
+

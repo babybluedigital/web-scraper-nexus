@@ -21,4 +21,3 @@ const postScrapeConfig = async (scrapeData) => {
 };
 
 export { postScrapeConfig };
-
