@@ -18,6 +18,9 @@ const isFormValid = computed(() => {
   accountDataLocal.value.endDate;
 });
 
+// Define your data properties
+const priceRange = ref([25, 1000]);
+
 // References for the date picker dialogs
 const startDateDialog = ref(false);
 const endDateDialog = ref(false);
@@ -62,32 +65,13 @@ const openUrl = (url) => {
         
         <!-- Form -->
         <VForm>
-          <!-- Card to hold Max Price Slider to set limit for max ticket prices -->
-          <v-card variant="tonal" color="grey" class="mt-2 mb-5 px-3 py-5">
-            <VRow class="mt-0 mx-1">
-                <v-col cols="12" md="12" class="ma-0 ps-0 pt-0 pr-0 pb-0">
-                  <v-chip color="primary">
-                    Set Max Price
-                  </v-chip>
-                </v-col>
-                <v-col cols="12" md="12">
-                <v-slider
-                v-model="value"
-                color="default"
-                :max="1"
-                :min="0"
-                :step="0.5"
-                thumb-label
-                ></v-slider>
-                </v-col>
-            </VRow>
-          </v-card>
           
           <!-- Card to hold scraper input form and actions -->
-          <v-card variant="tonal" color="grey" class="mt-5 mb-7 px-3 py-5">
+          <v-card variant="tonal" color="grey" class="mt-2 mb-7 px-3 py-5">
             <VRow class="pt-0">
+
               <!-- Keyword Field -->
-              <VCol md="6" cols="12">
+              <VCol cols="12" md="4" >
                 <VTextField
                 v-model="accountDataLocal.keyword"
                 placeholder="Enter Artist Name"
@@ -97,12 +81,21 @@ const openUrl = (url) => {
               </VCol>
               
               <!-- Country Field -->
-              <VCol cols="12" md="6">
+              <VCol cols="12" md="4">
                 <VSelect
                 v-model="accountDataLocal.country"
                 label="Select Country"
                 :items="['GB']"
                 placeholder="Select Country"
+                />
+              </VCol>
+              
+              <!-- Max Price Entry Field -->
+              <VCol cols="12" md="4">
+                <VSelect
+                label="Set Max Price"
+                :items="['25', '50', '100', '200', '500', '1000']"
+                placeholder="Set Max Price"
                 />
               </VCol>
               
@@ -190,6 +183,7 @@ const openUrl = (url) => {
             </v-dialog>
             
           </VCol>
+          
         </VRow>
         
       </v-card>
