@@ -1,13 +1,13 @@
 <script setup>
 import {
-accountDataLocal,
-errorMessage,
-eventData,
-saveScrape,
-scrapeData,
-searchPerformed,
-showErrorAlert,
-showSuccessAlert
+  accountDataLocal,
+  errorMessage,
+  eventData,
+  saveScrape,
+  scrapeData,
+  searchPerformed,
+  showErrorAlert,
+  showSuccessAlert
 } from '@/scrapers/TicketMasterScraper.js';
 import { computed, ref } from 'vue';
 
@@ -62,49 +62,114 @@ const openUrl = (url) => {
         
         <!-- Form -->
         <VForm>
-          <VRow class="pt-5">
-            <!-- Keyword Field -->
-            <VCol md="6" cols="12">
-              <VTextField
-              v-model="accountDataLocal.keyword"
-              placeholder="Enter Artist Name"
-              label="Enter Artist Name"
-              :rules="[required]"
-              />
+          <!-- Card to hold Max Price Slider to set limit for max ticket prices -->
+          <v-card variant="tonal" color="grey" class="mt-2 mb-5 px-3 py-5">
+            <VRow class="mt-0 mx-1">
+                <v-col cols="12" md="12" class="ma-0 ps-0 pt-0 pr-0 pb-0">
+                  <v-chip color="primary">
+                    Set Max Price
+                  </v-chip>
+                </v-col>
+                <v-col cols="12" md="12">
+                <v-slider
+                v-model="value"
+                color="default"
+                :max="1"
+                :min="0"
+                :step="0.5"
+                thumb-label
+                ></v-slider>
+                </v-col>
+            </VRow>
+          </v-card>
+          
+          <!-- Card to hold scraper input form and actions -->
+          <v-card variant="tonal" color="grey" class="mt-5 mb-7 px-3 py-5">
+            <VRow class="pt-0">
+              <!-- Keyword Field -->
+              <VCol md="6" cols="12">
+                <VTextField
+                v-model="accountDataLocal.keyword"
+                placeholder="Enter Artist Name"
+                label="Enter Artist Name"
+                :rules="[required]"
+                />
+              </VCol>
+              
+              <!-- Country Field -->
+              <VCol cols="12" md="6">
+                <VSelect
+                v-model="accountDataLocal.country"
+                label="Select Country"
+                :items="['GB']"
+                placeholder="Select Country"
+                />
+              </VCol>
+              
+              <!-- Start Date Picker -->
+              <VCol cols="12" md="6">
+                
+                <v-dialog width="500" v-model="startDateDialog">
+                  <template v-slot:activator="{ props }">
+                    <v-row align="center">
+                      <v-col cols="auto">
+                        <v-btn
+                        color="primary"
+                        prepend-icon="mdi-calendar"
+                        v-bind="props"
+                        variant="tonal"
+                        >Select Start Date
+                        <v-tooltip
+                        activator="parent"
+                        location="end"
+                        >Select the start date for this scraper</v-tooltip>
+                      </v-btn>
+                    </v-col>
+                    <v-col class="d-flex justify-end flex-wrap">
+                      <v-chip v-if="startDateLabel" class="ml-2" color="default" text-color="white">
+                        {{ startDateLabel }}
+                      </v-chip>
+                    </v-col>
+                  </v-row>
+                </template>
+                
+                <template v-slot:default="dialogScope">
+                  <v-card>
+                    <v-card-title>Select Start Date</v-card-title>
+                    <v-card-text>
+                      <v-date-picker v-model="accountDataLocal.startDate" :rules="[dateRequired]" @input="dialogScope.isActive = false"></v-date-picker>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                    </v-card-actions>
+                  </v-card>
+                </template>
+              </v-dialog> 
+              
             </VCol>
             
-            <!-- Country Field -->
-            <VCol cols="12" md="6">
-              <VSelect
-              v-model="accountDataLocal.country"
-              label="Select Country"
-              :items="['GB']"
-              placeholder="Select Country"
-              />
-            </VCol>
-            
-            <!-- Start Date Picker -->
+            <!-- End Date Picker -->
             <VCol cols="12" md="6">
               
-              <v-dialog width="500" v-model="startDateDialog">
+              <v-dialog ref="endDialog" width="500" v-model="endDateDialog">
                 <template v-slot:activator="{ props }">
                   <v-row align="center">
                     <v-col cols="auto">
                       <v-btn
-                      color="default"
+                      color="primary"
                       prepend-icon="mdi-calendar"
                       v-bind="props"
                       variant="tonal"
-                      >Select Start Date
+                      >Select End Date
                       <v-tooltip
                       activator="parent"
                       location="end"
-                      >Select the start date for this scraper</v-tooltip>
+                      >Select the end date for this scraper</v-tooltip>
                     </v-btn>
                   </v-col>
                   <v-col class="d-flex justify-end flex-wrap">
-                    <v-chip v-if="startDateLabel" class="ml-2" color="primary" text-color="white">
-                      {{ startDateLabel }}
+                    <v-chip v-if="endDateLabel" class="ml-2" color="default" text-color="white">
+                      {{ endDateLabel }}
                     </v-chip>
                   </v-col>
                 </v-row>
@@ -112,67 +177,22 @@ const openUrl = (url) => {
               
               <template v-slot:default="dialogScope">
                 <v-card>
-                  <v-card-title>Select Start Date</v-card-title>
+                  <v-card-title>Select End Date</v-card-title>
                   <v-card-text>
-                    <v-date-picker v-model="accountDataLocal.startDate" :rules="[dateRequired]" @input="dialogScope.isActive = false"></v-date-picker>
+                    <v-date-picker v-model="accountDataLocal.endDate" :rules="[dateRequired]" @input="dialogScope.isActive = false"></v-date-picker>
                   </v-card-text>
                   <v-card-actions>
                     <v-spacer></v-spacer>
+                    <v-btn text @click="endDateDialog = false">Close</v-btn>
                   </v-card-actions>
                 </v-card>
               </template>
-            </v-dialog> 
+            </v-dialog>
             
           </VCol>
-          
-          <!-- End Date Picker -->
-          <VCol cols="12" md="6">
-            
-            <v-dialog ref="endDialog" width="500" v-model="endDateDialog">
-              <template v-slot:activator="{ props }">
-                <v-row align="center">
-                  <v-col cols="auto">
-                    <v-btn
-                    color="default"
-                    prepend-icon="mdi-calendar"
-                    v-bind="props"
-                    variant="tonal"
-                    >Select End Date
-                    <v-tooltip
-                    activator="parent"
-                    location="end"
-                    >Select the end date for this scraper</v-tooltip>
-                  </v-btn>
-                </v-col>
-                <v-col class="d-flex justify-end flex-wrap">
-                  <v-chip v-if="endDateLabel" class="ml-2" color="primary" text-color="white">
-                    {{ endDateLabel }}
-                  </v-chip>
-                </v-col>
-              </v-row>
-            </template>
-            
-            <template v-slot:default="dialogScope">
-              <v-card>
-                <v-card-title>Select End Date</v-card-title>
-                <v-card-text>
-                  <v-date-picker v-model="accountDataLocal.endDate" :rules="[dateRequired]" @input="dialogScope.isActive = false"></v-date-picker>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn text @click="endDateDialog = false">Close</v-btn>
-                </v-card-actions>
-              </v-card>
-            </template>
-          </v-dialog>
-          
-        </VCol>
-      </VRow>
-      
-      <VRow class="px-4 py-5">
-        <!-- Divider to split the inputs and form buttons -->
-        <v-divider :thickness="2"></v-divider>
-      </VRow>
+        </VRow>
+        
+      </v-card>
       
       <!-- Form Actions -->
       <VRow>
