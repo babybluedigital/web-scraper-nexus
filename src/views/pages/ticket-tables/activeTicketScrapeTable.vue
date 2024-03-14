@@ -62,6 +62,9 @@
       <!-- Bind the title to the postTitle property -->
       <v-toolbar-title>{{ postTitle }}</v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-chip color="default">
+        <strong>Max Price:&nbsp;</strong>{{ maxPrice }}
+      </v-chip>
       <v-chip color="red-lighten-4" variant="tonal" class="ma-2">
         {{expiryDate}}
       </v-chip>
@@ -69,11 +72,12 @@
         <v-icon>mdi-close</v-icon>
       </v-btn>
     </v-toolbar>
+    
     <!-- Content for the side panel goes here -->
     <VRow>
       <VCol cols="12">
         <VCard class="pt-5 px-5 pb-5" variant="flat">
-          <VTable v-if="eventData && eventData._embedded.events.length > 0" fixed-header>
+          <VTable v-if="filteredEvents.length > 0" fixed-header>
             <thead>
               <tr>
                 <th><strong>Event Name</strong></th>
@@ -85,7 +89,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="event in eventData._embedded.events" :key="event.id">
+              <tr v-for="event in filteredEvents" :key="event.id">
                 <td>{{ event.name }}</td>
                 <td>{{ event.sales.public.startDateTime }}</td>
                 <td>
@@ -106,7 +110,7 @@
           </tbody>
         </VTable>
         <VAlert
-        v-if="!eventData || eventData._embedded.events.length === 0"
+        v-if="!filteredEvents.length"
         type="info"
         dense
         >
@@ -121,7 +125,7 @@
 
 <script>
 import { fetchScrapes } from '@/services/scrapeGetService';
-import { updateScrapeApiValue, updateScrapeStatus } from '@/services/scrapeUpdateService';
+import { updateScrapeStatus } from '@/services/scrapeUpdateService';
 
 export default {
   name: 'ActiveTicketScrapeTable',
@@ -133,8 +137,40 @@ export default {
       sidePanelOpen: false,
       postTitle: '',
       deletingScrapeId: null,
-      eventData: null, // Add this line to store the fetched event data
+      eventData: null,
+      maxPrice: '',
     };
+  },
+  computed: {
+    filteredEvents() {
+      if (!this.eventData || !this.eventData._embedded || !this.eventData._embedded.events.length) {
+        return [];
+      }
+      
+      const filteredOut = [];
+      const result = this.eventData._embedded.events.filter(event => {
+        if (!event.priceRanges || !event.priceRanges[0].max) {
+          filteredOut.push(event);
+          return false;
+        }
+        const eventMaxPrice = parseFloat(event.priceRanges[0].max);
+        if (eventMaxPrice > parseFloat(this.maxPrice)) {
+          filteredOut.push(event);
+          return false;
+        }
+        return true;
+      });
+
+      if (filteredOut.length > 0) {
+        console.groupCollapsed('Filtered Out Events Based on Max Price');
+        filteredOut.forEach(event => {
+          console.log(`${event.name}: Max Price - ${event.priceRanges ? event.priceRanges[0].max + ' ' + event.priceRanges[0].currency : 'N/A'}`);
+        });
+        console.groupEnd();
+      }
+
+      return result;
+    }
   },
   mounted() {
     this.loadData();
@@ -168,44 +204,33 @@ export default {
       this.sidePanelOpen = true;
       this.postTitle = `${scrape.acf.artist_name} : ${scrape.acf.start_date} (${scrape.acf.country})`;
       this.expiryDate = `Scrape Expires - ${scrape.acf.end_date}`;
+      this.maxPrice = scrape.acf.max_price;
       
-      // Call fetchEventData to fetch event data and update api_value
+      console.groupCollapsed('Scrape Details');
+      console.log('Max Price:', this.maxPrice);
+      console.groupEnd();
+      
       this.fetchEventData(scrape);
     },
     toggleSidePanel() {
       this.sidePanelOpen = !this.sidePanelOpen;
     },
     async fetchEventData(scrape) {
-      // Extract necessary data from the 'scrape' object
       const { artist_name, country, start_date, end_date } = scrape.acf;
-      
       const apiKey = 'PF6iGSTrUmYAJ0JnAYA6pKlpEOOkyGA3';
-      
-      // Correctly format the date from 'dd/mm/yyyy' to 'YYYY-MM-DDTHH:mm:ssZ'
       const convertDate = (date, isStart) => {
         const parts = date.split('/');
-        // Ensure parts are correctly ordered for 'YYYY-MM-DD' format
         const formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
         return isStart ? `${formattedDate}T14:00:00Z` : `${formattedDate}T23:59:59Z`;
       };
-      
       const formattedStartDate = convertDate(start_date, true);
       const formattedEndDate = convertDate(end_date, false);
-      
       let url = `https://app.ticketmaster.com/discovery/v2/events?apikey=${apiKey}&keyword=${encodeURIComponent(artist_name)}&locale=*&countryCode=${country}&startDateTime=${formattedStartDate}&endDateTime=${formattedEndDate}`;
       
       try {
         const response = await fetch(url);
         const data = await response.json();
-        this.eventData = data; // Store the fetched data
-        
-        // Update api_value with the constructed URL
-        const updateSuccess = await updateScrapeApiValue(scrape.id, url); // Assuming 'scrape.id' is accessible
-        if (updateSuccess) {
-          console.log('Successfully updated api_value with the URL:', url);
-        } else {
-          console.error('Failed to update api_value with the URL');
-        }
+        this.eventData = data;
       } catch (error) {
         console.error('Error fetching event data or updating api_value:', error);
       }
