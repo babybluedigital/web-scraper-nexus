@@ -73,8 +73,13 @@
       </v-btn>
     </v-toolbar>
     
+    <!-- Skeleton Loader for the Side Panel when loading -->
+    <div v-if="sidePanelLoading" class="pa-5">
+      <v-skeleton-loader class="admin_skeleton_loader" type="list-item" v-for="n in 5" :key="`skeleton-${n}`"></v-skeleton-loader>
+    </div>
+    
     <!-- Content for the side panel goes here -->
-    <VRow>
+    <VRow v-else>
       <VCol cols="12">
         <VCard class="pt-5 px-5 pb-5" variant="flat">
           <VTable v-if="filteredEvents.length > 0" fixed-header>
@@ -139,6 +144,7 @@ export default {
       deletingScrapeId: null,
       eventData: null,
       maxPrice: '',
+      sidePanelLoading: false, // Add this line
     };
   },
   computed: {
@@ -160,7 +166,7 @@ export default {
         }
         return true;
       });
-
+      
       if (filteredOut.length > 0) {
         console.groupCollapsed('Filtered Out Events Based on Max Price');
         filteredOut.forEach(event => {
@@ -168,7 +174,7 @@ export default {
         });
         console.groupEnd();
       }
-
+      
       return result;
     }
   },
@@ -216,6 +222,10 @@ export default {
       this.sidePanelOpen = !this.sidePanelOpen;
     },
     async fetchEventData(scrape) {
+      console.groupCollapsed("Fetching Event Data");
+      console.log("Start loading for side panel");
+      this.sidePanelLoading = true;
+      
       const { artist_name, country, start_date, end_date } = scrape.acf;
       const apiKey = 'PF6iGSTrUmYAJ0JnAYA6pKlpEOOkyGA3';
       const convertDate = (date, isStart) => {
@@ -223,16 +233,24 @@ export default {
         const formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
         return isStart ? `${formattedDate}T14:00:00Z` : `${formattedDate}T23:59:59Z`;
       };
+      
       const formattedStartDate = convertDate(start_date, true);
       const formattedEndDate = convertDate(end_date, false);
       let url = `https://app.ticketmaster.com/discovery/v2/events?apikey=${apiKey}&keyword=${encodeURIComponent(artist_name)}&locale=*&countryCode=${country}&startDateTime=${formattedStartDate}&endDateTime=${formattedEndDate}`;
       
+      console.log(`Fetching data for: ${artist_name} from ${formattedStartDate} to ${formattedEndDate}`);
+      
       try {
         const response = await fetch(url);
         const data = await response.json();
+        console.log("Data fetched successfully:", data);
         this.eventData = data;
       } catch (error) {
-        console.error('Error fetching event data or updating api_value:', error);
+        console.error('Error fetching event data:', error);
+      } finally {
+        console.log("Stop loading for side panel");
+        this.sidePanelLoading = false;
+        console.groupEnd();
       }
     },
     openUrl(url) {
