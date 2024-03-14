@@ -93,6 +93,7 @@ const openUrl = (url) => {
               <!-- Max Price Entry Field -->
               <VCol cols="12" md="4">
                 <VSelect
+                v-model="accountDataLocal.maxPrice"
                 label="Set Max Price"
                 :items="['25', '50', '100', '200', '500', '1000']"
                 placeholder="Set Max Price"
@@ -183,7 +184,7 @@ const openUrl = (url) => {
             </v-dialog>
             
           </VCol>
-          
+
         </VRow>
         
       </v-card>

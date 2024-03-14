@@ -9,6 +9,7 @@ export const accountData = {
   country: 'GB',
   startDate: null,
   endDate: null,
+  maxPrice: null, // Add maxPrice with a default value
 };
 
 export const accountDataLocal = ref(structuredClone(accountData));
@@ -60,6 +61,7 @@ export const saveScrape = async () => {
         country: accountDataLocal.value.country,
         start_date: formattedStartDate,
         end_date: formattedEndDate,
+        max_price: accountDataLocal.value.maxPrice || "Not specified", // Include the max price here
         api_value: apiUrl, // Include the API URL here
         status: "Active", // Update the status here
       }
