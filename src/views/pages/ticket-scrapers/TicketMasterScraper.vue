@@ -106,21 +106,22 @@ const openUrl = (url) => {
                 <v-dialog width="500" v-model="startDateDialog">
                   <template v-slot:activator="{ props }">
                     <v-row align="center">
-                      <v-col cols="auto">
+                      <v-col cols="12" md="4">
                         <v-btn
                         color="primary"
                         prepend-icon="mdi-calendar"
                         v-bind="props"
                         variant="tonal"
+                        style="width: 100%;"
                         >Select Start Date
                         <v-tooltip
                         activator="parent"
-                        location="end"
+                        location="top"
                         >Select the start date for this scraper</v-tooltip>
                       </v-btn>
                     </v-col>
-                    <v-col class="d-flex justify-end flex-wrap">
-                      <v-chip v-if="startDateLabel" class="ml-2" color="default" text-color="white">
+                    <v-col cols="12" md="8" class="d-flex justify-end flex-wrap">
+                      <v-chip v-if="startDateLabel" class="ml-2" color="default" text-color="white" style="width: 100%; justify-content: center;">
                         {{ startDateLabel }}
                       </v-chip>
                     </v-col>
@@ -148,21 +149,22 @@ const openUrl = (url) => {
               <v-dialog ref="endDialog" width="500" v-model="endDateDialog">
                 <template v-slot:activator="{ props }">
                   <v-row align="center">
-                    <v-col cols="auto">
+                    <v-col cols="12" md="4">
                       <v-btn
                       color="primary"
                       prepend-icon="mdi-calendar"
                       v-bind="props"
                       variant="tonal"
+                      style="width: 100%;"
                       >Select End Date
                       <v-tooltip
                       activator="parent"
-                      location="end"
+                      location="bottom"
                       >Select the end date for this scraper</v-tooltip>
                     </v-btn>
                   </v-col>
-                  <v-col class="d-flex justify-end flex-wrap">
-                    <v-chip v-if="endDateLabel" class="ml-2" color="default" text-color="white">
+                  <v-col cols="12" md="8" class="d-flex justify-end flex-wrap">
+                    <v-chip v-if="endDateLabel" class="ml-2" color="default" text-color="white" style="width: 100%; justify-content: center;">
                       {{ endDateLabel }}
                     </v-chip>
                   </v-col>
