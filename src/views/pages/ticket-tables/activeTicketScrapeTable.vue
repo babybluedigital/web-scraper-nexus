@@ -87,7 +87,7 @@
               <tr>
                 <th><strong>Event Name</strong></th>
                 <th><strong>Sales Start Date</strong></th>
-                <th><strong>Max Price</strong></th>
+                <th><strong>Ticket Price</strong></th>
                 <th><strong>Venue</strong></th>
                 <th><strong>Event Start Date</strong></th>
                 <th><strong>Event URL</strong></th>

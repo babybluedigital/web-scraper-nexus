@@ -101,7 +101,7 @@ const openUrl = (url) => {
               </VCol>
               
               <!-- Start Date Picker -->
-              <VCol cols="12" md="6">
+              <VCol cols="12" md="12">
                 
                 <v-dialog width="500" v-model="startDateDialog">
                   <template v-slot:activator="{ props }">
@@ -143,7 +143,7 @@ const openUrl = (url) => {
             </VCol>
             
             <!-- End Date Picker -->
-            <VCol cols="12" md="6">
+            <VCol cols="12" md="12">
               
               <v-dialog ref="endDialog" width="500" v-model="endDateDialog">
                 <template v-slot:activator="{ props }">
@@ -258,7 +258,7 @@ const openUrl = (url) => {
           <tr>
             <th><strong>Event Name</strong></th>
             <th><strong>Sales Start Date</strong></th>
-            <th><strong>Max Price</strong></th>
+            <th><strong>Ticket Price</strong></th>
             <th><strong>Venue</strong></th>
             <th><strong>Event Start Date</strong></th>
             <th><strong>Event URL</strong></th>
