@@ -25,7 +25,7 @@
                 floating
                 offset-y="-7"
                 offset-x="-4"
-                content="New Tickets"
+                content="New"
                 color="success">
               </v-badge>
             </td>
@@ -139,7 +139,7 @@
 
 <script>
 import { fetchScrapes } from '@/services/scrapeGetService';
-import { updateScrapeStatus } from '@/services/scrapeUpdateService';
+import { updateScrapeNotifications, updateScrapeStatus } from '@/services/scrapeUpdateService';
 
 export default {
   name: 'ActiveTicketScrapeTable',
@@ -215,7 +215,8 @@ export default {
         console.error('Error archiving the post:', error);
       }
     },
-    openSidePanel(scrape) {
+    
+    async openSidePanel(scrape) {
       this.sidePanelOpen = true;
       this.postTitle = `${scrape.acf.artist_name} : ${scrape.acf.start_date} (${scrape.acf.country})`;
       this.expiryDate = `Scrape Expires - ${scrape.acf.end_date}`;
@@ -226,7 +227,22 @@ export default {
       console.groupEnd();
       
       this.fetchEventData(scrape);
+      
+      // Update the Notifications ACF field to 'False'
+      try {
+        const updated = await updateScrapeNotifications(scrape.id, 'False');
+        if (updated) {
+          console.log('Notifications updated successfully');
+          // Optionally refresh the scrape data in your component to reflect the change
+          this.loadData(); // Assuming loadData fetches the scrapes and their current states
+        } else {
+          console.error('Failed to update notifications');
+        }
+      } catch (error) {
+        console.error('Error updating notifications status:', error);
+      }
     },
+    
     toggleSidePanel() {
       this.sidePanelOpen = !this.sidePanelOpen;
     },

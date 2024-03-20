@@ -10,14 +10,14 @@ const updateScrapeStatus = async (scrapeId, newStatus) => {
         status: newStatus,
       },
     };
-
+    
     const response = await axios.put(`${API_BASE_URL}/scrape/${scrapeId}`, payload, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Basic ${encodedCredentials}`,
       },
     });
-
+    
     if (response.status === 200) {
       // Update was successful
       return true;
@@ -33,6 +33,35 @@ const updateScrapeStatus = async (scrapeId, newStatus) => {
   }
 };
 
+// Add a new function to update the Notifications field
+const updateScrapeNotifications = async (scrapeId, notificationsStatus) => {
+  try {
+    const payload = {
+      acf: {
+        notifications: notificationsStatus,
+      },
+    };
+    
+    const response = await axios.put(`${API_BASE_URL}/scrape/${scrapeId}`, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${encodedCredentials}`,
+      },
+    });
+    
+    if (response.status === 200) {
+      console.log('Successfully updated notifications for', scrapeId);
+      return true;
+    } else {
+      console.error('Failed to update notifications:', response);
+      return false;
+    }
+  } catch (error) {
+    console.error('Error updating notifications:', error);
+    return false;
+  }
+};
+
 // New function to update api_value
 const updateScrapeApiValue = async (scrapeId, apiValue) => {
   try {
@@ -41,14 +70,14 @@ const updateScrapeApiValue = async (scrapeId, apiValue) => {
         api_value: apiValue,
       },
     };
-
+    
     const response = await axios.put(`${API_BASE_URL}/scrape/${scrapeId}`, payload, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Basic ${encodedCredentials}`,
       },
     });
-
+    
     if (response.status === 200) {
       console.log('Successfully updated api_value for', scrapeId);
       return true;
@@ -63,5 +92,4 @@ const updateScrapeApiValue = async (scrapeId, apiValue) => {
 };
 
 
-export { updateScrapeApiValue, updateScrapeStatus };
-
+export { updateScrapeApiValue, updateScrapeNotifications, updateScrapeStatus };
