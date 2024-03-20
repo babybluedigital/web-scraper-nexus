@@ -19,38 +19,47 @@
           </thead>
           <tbody>
             <tr v-for="scrape in scrapes" :key="scrape.id">
-              <td>{{ scrape.acf.artist_name }}</td>
-              <td>{{ scrape.acf.country }}</td>
-              <td>{{ scrape.acf.start_date }}</td>
-              <td>{{ scrape.acf.end_date }}</td>
-              <td>
-                <v-chip
-                clickable
-                color="success"
-                @click="openSidePanel(scrape)"
-                >
-                View Results
-              </v-chip>
+              <td>{{ scrape.acf.artist_name }}
+                <v-badge
+                v-if="scrape.acf.notifications === 'True'"
+                floating
+                offset-y="-7"
+                offset-x="-4"
+                content="New Tickets"
+                color="success">
+              </v-badge>
             </td>
+            <td>{{ scrape.acf.country }}</td>
+            <td>{{ scrape.acf.start_date }}</td>
+            <td>{{ scrape.acf.end_date }}</td>
             <td>
               <v-chip
               clickable
-              color="warning"
-              @click="archiveScrape(scrape.id)"
+              color="success"
+              @click="openSidePanel(scrape)"
               >
-              Archive Scrape
+              View Results
             </v-chip>
           </td>
-        </tr>
-      </tbody>
-    </VTable>
-    <VAlert
-    v-if="searchPerformed && scrapes.length === 0"
-    type="info"
-    dense
-    >
-    No events to display. Adjust search criteria and try again.
-  </VAlert>
+          <td>
+            <v-chip
+            clickable
+            color="warning"
+            @click="archiveScrape(scrape.id)"
+            >
+            Archive Scrape
+          </v-chip>
+        </td>
+      </tr>
+    </tbody>
+  </VTable>
+  <VAlert
+  v-if="searchPerformed && scrapes.length === 0"
+  type="info"
+  dense
+  >
+  No events to display. Adjust search criteria and try again.
+</VAlert>
 </VCard>
 </VCol>
 </VRow>
