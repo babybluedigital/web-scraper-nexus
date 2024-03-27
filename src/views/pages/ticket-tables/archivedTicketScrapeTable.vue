@@ -85,13 +85,22 @@ export default {
         async loadData() {
             this.loading = true;
             try {
+                console.groupCollapsed('Fetching and filtering scrapes');
                 const data = await fetchScrapes();
+                console.log('Fetched data:', data);
+
                 // Filter the data to include only active scrapes
-                this.scrapes = data.filter(scrape => scrape.acf.status === 'Archived');
+                const filteredScrapes = data.filter(scrape => scrape.acf.status === 'Archived');
+                console.log('Filtered archived scrapes:', filteredScrapes);
+
+                this.scrapes = filteredScrapes;
                 this.searchPerformed = true;
                 
                 // Assuming you have retrieved the post title from your CMS data
-                this.postTitle = data.postTitle; // Update 'data.postTitle' with the actual property from your CMS data
+                // Note: Update 'data.postTitle' with the actual property from your CMS data
+                this.postTitle = data.postTitle || 'Post title not found';
+                console.log('Post title:', this.postTitle);
+                console.groupEnd();
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -100,10 +109,7 @@ export default {
         },
         async deleteScrape(scrapeId) {
             try {
-                // Implement the logic to delete a scrape with the given ID
-                // You can use the deleteScrape function from the service
                 await deleteScrape(scrapeId);
-                // Refresh the data after successful deletion
                 this.loadData();
             } catch (error) {
                 console.error('Failed to delete the post:', error);
@@ -113,10 +119,8 @@ export default {
             try {
                 const success = await updateScrapeStatus(scrape.id, 'Active');
                 if (success) {
-                    // Optionally, refresh the list to reflect the status update
                     this.loadData();
                 } else {
-                    // Handle the case where the update wasn't successful
                     console.error('Failed to reactivate the scrape');
                 }
             } catch (error) {
